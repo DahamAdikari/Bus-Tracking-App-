@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:test_4/auth/Role_Selection_Screen/selection_screen.dart';
 import 'package:test_4/auth/sign_in.dart';
 import 'package:test_4/auth/home_page.dart';
 
@@ -118,11 +119,11 @@ class LogInScreen extends StatelessWidget {
                         ),
                       ),
                       SizedBox(
-                        height: 3,
+                        height: 20,
                       ),
                       Align(
-                        alignment: Alignment.center,
-                        child: Text("OR", style: TextStyle(fontSize: 13)),
+                        alignment: Alignment.centerLeft,
+                        child: Text("Don't have an Account?", style: TextStyle(fontSize: 13,fontWeight: FontWeight.w500),),
                       ),
                       SizedBox(
                         height: 3,
@@ -130,35 +131,40 @@ class LogInScreen extends StatelessWidget {
                       SizedBox(
                         width: double.infinity,
                         child: OutlinedButton.icon(
-                          icon: Image(
-                            image: AssetImage(GoogleLogo),
-                            width: 20,
-                          ),
-                          onPressed: () {},
+                          // icon: Image(
+                          //   image: AssetImage(GoogleLogo),
+                          //   width: 20,
+                          // ),
+                          onPressed: () {Get.to(() => const WelcomeScreen());},
                           style: OutlinedButton.styleFrom(
-                              shape: RoundedRectangleBorder(),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0) ),
+                              backgroundColor:tPrimaryColor,
                               foregroundColor: Colors.black54,
                               side:
-                                  BorderSide(color: Colors.black87, width: 0.7),
+                                  BorderSide(color: Colors.black87, width: 0.7,),
                               padding: EdgeInsets.symmetric(
-                                  vertical: 8, horizontal: 50)),
-                          label: Text("Sign In with Google",
-                              style: TextStyle(fontWeight: FontWeight.w700)),
+                                  vertical: 10, horizontal:50)),
+                          label: Text("Create a New Account",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600),)
+                              //style: TextStyle(fontWeight: FontWeight.w900)),
                         ),
                       ),
-                      TextButton(
-                        onPressed: () {
-                          Get.to(() => const SignInScreen());
-                        },
-                        child: const Text.rich(TextSpan(
-                            text: "Don't have an Account?",
-                            style: TextStyle(color: Colors.black87),
-                            children: [
-                              TextSpan(
-                                  text: " Sign Up",
-                                  style: TextStyle(color: Colors.blue)),
-                            ])),
-                      ),
+                      // TextButton(
+                      //   onPressed: () {
+                      //     Get.to(() => const SignInScreen());
+                      //   },
+                      //   child: const Text.rich(TextSpan(
+                      //       text: "Don't have an Account?",
+                      //       style: TextStyle(color: Colors.black87),
+                      //       children: [
+                      //         TextSpan(
+                      //             text: " Sign Up",
+                      //             style: TextStyle(color: Colors.blue)),
+                      //       ])),
+                      // ),
                     ],
                   ),
                 ))

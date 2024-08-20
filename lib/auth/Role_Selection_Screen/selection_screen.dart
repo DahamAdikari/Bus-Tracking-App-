@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:test_4/auth/sign_in.dart';
 import '../Driver/driver_login_signin_select.dart';
 import '../Passenger/passenger_login_signin_selection.dart';
 import '../constants/colors.dart';
@@ -33,7 +34,7 @@ class WelcomeScreen extends StatelessWidget {
                 height:200, // Set the desired height
                 fit: BoxFit.contain),
             ElevatedButton(
-              onPressed: ()=>Get.to(( )=>const PassengerSelect()),
+              onPressed: ()=>Get.to(( )=>const SignInScreen()),
 
               style: OutlinedButton.styleFrom(
                 backgroundColor: tPrimaryColor,
@@ -55,7 +56,7 @@ class WelcomeScreen extends StatelessWidget {
             const Image(image: AssetImage(DriverImage),
                 height:200, // Set the desired height
                 fit: BoxFit.contain),
-            ElevatedButton(onPressed: ()=>Get.to(( )=>const DriverSelect()),
+            ElevatedButton(onPressed: ()=>Get.to(( )=>const SignInScreen()),
 
               style: OutlinedButton.styleFrom(
                 backgroundColor: tPrimaryColor,
