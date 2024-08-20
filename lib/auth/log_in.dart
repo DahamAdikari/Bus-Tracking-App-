@@ -44,7 +44,7 @@ class LogInScreen extends StatelessWidget {
                         image: AssetImage(AppLogoImage),
                         height: size.height * 0.2),
                     Text(
-                      "Welcome Back",
+                      " Welcome Back",
                       style: TextStyle(
                           color: tPrimaryColor,
                           fontSize: 30,
