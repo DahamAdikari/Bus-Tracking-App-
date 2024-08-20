@@ -95,11 +95,11 @@ class SignInScreen extends StatelessWidget {
                       SizedBox(height: 12),
                       TextFormField(
                         decoration: InputDecoration(
-                          label: Text("Phone Number",
+                          label: Text("Password",
                               style: TextStyle(color: tPrimaryColor)),
-                          hintText: "Enter Your Phone Number",
+                          hintText: "Enter Your Password",
                           prefixIcon:
-                              Icon(Icons.phone_android, color: tPrimaryColor),
+                              Icon(Icons.fingerprint_rounded, color: tPrimaryColor),
                           border: OutlineInputBorder(),
                           focusedBorder: OutlineInputBorder(
                             borderSide:
@@ -111,9 +111,9 @@ class SignInScreen extends StatelessWidget {
                       TextFormField(
                         obscureText: true,
                         decoration: InputDecoration(
-                          label: Text("Password",
+                          label: Text("Confirm Password",
                               style: TextStyle(color: tPrimaryColor)),
-                          hintText: "Enter a Strong Password",
+                          hintText: "ReEnter Your Password",
                           prefixIcon: Icon(Icons.fingerprint_rounded,
                               color: tPrimaryColor),
                           border: OutlineInputBorder(),

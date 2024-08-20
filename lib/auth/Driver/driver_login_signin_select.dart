@@ -11,26 +11,26 @@ import '../constants/image_strings.dart';
 import 'driver_login.dart';
 import 'driver_signin.dart';
 
-class DriverSelect extends StatelessWidget {
-  const DriverSelect({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    var height = MediaQuery.of(context).size.height;
-    return Scaffold(
-      backgroundColor: bOnBoardingColor3,
-      body: LogOrSign(
-        tittle1: "SIGNIN",
-        tittle2: "LOGIN",
-        tittle3: "Hello Driver",
-        userImagePath: DriverImage,
-        onTap1: () {
-          Get.to(() => const SignInScreen());
-        },
-        onTap2: () {
-          Get.to(() => const LogInScreen());
-        },
-      ),
-    );
-  }
-}
+// class DriverSelect extends StatelessWidget {
+//   const DriverSelect({super.key});
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     var height = MediaQuery.of(context).size.height;
+//     return Scaffold(
+//       backgroundColor: bOnBoardingColor3,
+//       body: LogOrSign(
+//         tittle1: "SIGNIN",
+//         tittle2: "LOGIN",
+//         tittle3: "Hello Driver",
+//         userImagePath: DriverImage,
+//         onTap1: () {
+//           Get.to(() => const SignInScreen());
+//         },
+//         onTap2: () {
+//           Get.to(() => const LogInScreen());
+//         },
+//       ),
+//     );
+//   }
+// }
