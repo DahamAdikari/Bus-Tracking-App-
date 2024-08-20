@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "655131787263",
+    "project_id": "bustrackertest1",
+    "storage_bucket": "bustrackertest1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:655131787263:android:f787d2b46f79ad3541f1ca",
+        "android_client_info": {
+          "package_name": "com.example.test_4"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA2cHjDhmiajPmjEanIwnO3eI3LCyXrwVo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
