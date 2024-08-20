@@ -83,7 +83,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                     int nextPage = controller.currentPage +1;
                     if (nextPage<3){
                       controller.animateToPage(page: nextPage);}
-                    else { Get.to(()=>const LogInScreen());}
+                    else { Get.to(()=> LogInScreen());}
 
                   },
                   style: ElevatedButton.styleFrom(
@@ -106,7 +106,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                   top:10,right:20,
                   child: TextButton(
                     onPressed:(){
-                      Get.to(()=>const LogInScreen());
+                      Get.to(()=> LogInScreen());
                     },
                     child: const Text("skip",style: TextStyle(color: Colors.grey,),
                     ),
