@@ -227,7 +227,7 @@ class SignInScreen extends StatelessWidget {
                       SizedBox(height: 8),
                       TextButton(
                         onPressed: () {
-                          Get.to(() => const LogInScreen());
+                          Get.to(() =>  LogInScreen());
                         },
                         child: const Text.rich(
                           TextSpan(
