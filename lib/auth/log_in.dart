@@ -7,6 +7,7 @@ import 'package:test_4/auth/Role_Selection_Screen/selection_screen.dart';
 import 'package:test_4/auth/sign_in.dart';
 import 'package:test_4/auth/home_page.dart';
 import 'package:test_4/pages/Driver/buslist_driver.dart';
+import 'package:test_4/pages/admin.dart';
 import 'package:test_4/pages/passenger/searchpage_passenger.dart';
 
 //import '../LogIn_SignIn_Common/login_common.dart';
@@ -44,6 +45,8 @@ class LogInScreen extends StatelessWidget {
           Get.to(() => BusListPageDriver());
         } else if (role == 'Passenger') {
           Get.to(() => SearchBusPage());
+        } else if (role == 'admin') {
+          Get.to(() => AdminPage());
         } else {
           Get.snackbar('Error', 'Unknown role');
         }
@@ -62,6 +65,11 @@ class LogInScreen extends StatelessWidget {
     DocumentSnapshot passengerSnapshot = await _firestore.collection('passenger').doc(uid).get();
     if (passengerSnapshot.exists) {
       return 'Passenger';
+    }
+
+    DocumentSnapshot adminSnapshot = await _firestore.collection('admin').doc(uid).get();
+    if (adminSnapshot.exists) {
+      return 'admin';
     }
 
     return 'Unknown';
