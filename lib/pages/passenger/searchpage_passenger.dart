@@ -15,7 +15,11 @@ class _SearchBusPageState extends State<SearchBusPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Search Buses'),
+        title: Text(
+          'Search Buses',
+          style: const TextStyle(fontSize: 25.0),
+        ),
+        backgroundColor: Colors.lightBlue,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -23,6 +27,14 @@ class _SearchBusPageState extends State<SearchBusPage> {
           key: _formKey,
           child: Column(
             children: [
+              SizedBox(height: 10),
+              Text(
+                "Search for the bus you need!",
+                style: const TextStyle(fontSize: 20),
+              ),
+              Center(
+                child: Image.asset('assets/images/search_bus.png'),
+              ),
               TextFormField(
                 decoration: InputDecoration(labelText: 'Source Location'),
                 onSaved: (value) {
@@ -64,6 +76,10 @@ class _SearchBusPageState extends State<SearchBusPage> {
                     );
                   }
                 },
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: const Color(0xFF03A9F4),
+                ),
                 child: Text('View Buses'),
               ),
             ],
