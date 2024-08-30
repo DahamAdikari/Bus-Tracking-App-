@@ -2,15 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:test_4/addbusHalt.dart';
+import 'package:test_4/pages/Driver/Reg_seats.dart';
 import 'package:test_4/pages/SelectCurrentAdmin.dart';
 
-class AdminPage extends StatefulWidget {
+class RegistrationPageClass extends StatefulWidget {
+  final String userID; // Add this line to receive the UID
+
+  RegistrationPageClass(
+      {required this.userID}); // Modify constructor to accept UID
+
   @override
-  _AdminPageState createState() => _AdminPageState();
+  RegistrationPage createState() => RegistrationPage();
 }
 
-class _AdminPageState extends State<AdminPage> {
+class RegistrationPage extends State<RegistrationPageClass> {
   final _formKey = GlobalKey<FormState>();
+
   String? busID;
   String? busName;
   String? routeNum;
@@ -18,6 +25,14 @@ class _AdminPageState extends State<AdminPage> {
   String? destinationLocation;
   LatLng? _selectedLocation; // Store selected location
   List<Map<String, dynamic>> _busHalts = [];
+
+  late String userID;
+
+  @override
+  void initState() {
+    super.initState();
+    userID = widget.userID; // Initialize userID with value from widget
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -135,6 +150,22 @@ class _AdminPageState extends State<AdminPage> {
                   },
                   child: Text('Add Current Location of the Bus'),
                 ),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue, // Set button color to blue
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            RegSeats(), // Navigate to RegSeats
+                      ),
+                    );
+                  },
+                  child: Text('Add Seats'),
+                ),
                 if (_selectedLocation != null)
                   Text(
                       'Selected Location: Lat: ${_selectedLocation!.latitude}, Lng: ${_selectedLocation!.longitude}'),
@@ -171,11 +202,8 @@ class _AdminPageState extends State<AdminPage> {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
-      FirebaseFirestore.instance
-          .collection('driver')
-          .doc('BfVpZVAWiMMGbQj2Uohdm2COaUG2')
-          .collection('buses')
-          .add({
+      FirebaseFirestore.instance.collection('registration').add({
+        'userID': userID, // Add userID
         'busID': busID,
         'busName': busName,
         'routeNum': routeNum,
