@@ -88,8 +88,10 @@ class LogInScreen extends StatelessWidget {
               children: [
                 Column(
                   children: [
+
                     Image(image: AssetImage(AppLogoImage), height: size.height * 0.2),
                     Text(" Welcome Back", style: TextStyle(color: tPrimaryColor, fontSize: 30, fontWeight: FontWeight.w900)),
+
                   ],
                 ),
                 SizedBox(height: 30),
