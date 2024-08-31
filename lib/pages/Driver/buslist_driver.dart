@@ -17,27 +17,7 @@ class BusListPageDriver extends StatelessWidget {
       ),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: ElevatedButton(
-              onPressed: () {
-                if (userID != null) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          RegistrationPageClass(userID: userID), // Pass the UID
-                    ),
-                  );
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('User not logged in!')),
-                  );
-                }
-              },
-              child: Text('Go to Registration Page'),
-            ),
-          ),
+          // The list of buses should appear first
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream:
@@ -66,6 +46,28 @@ class BusListPageDriver extends StatelessWidget {
                   },
                 );
               },
+            ),
+          ),
+          // "Add a Bus" button should appear below the list
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: ElevatedButton(
+              onPressed: () {
+                if (userID != null) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          RegistrationPageClass(userID: userID), // Pass the UID
+                    ),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('User not logged in!')),
+                  );
+                }
+              },
+              child: Text('Add a Bus'),
             ),
           ),
         ],

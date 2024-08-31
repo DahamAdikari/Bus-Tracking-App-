@@ -164,7 +164,10 @@ class RegistrationPage extends State<RegistrationPageClass> {
                       ),
                     );
                   },
-                  child: Text('Add Seats'),
+                  child: Text(
+                    'Add Seats',
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
                 if (_selectedLocation != null)
                   Text(
