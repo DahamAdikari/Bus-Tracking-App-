@@ -6,7 +6,7 @@ import 'package:test_4/pages/Driver/Reg_seats.dart';
 import 'package:test_4/pages/SelectCurrentAdmin.dart';
 
 class RegistrationPageClass extends StatefulWidget {
-  final String userID; // Add this line to receive the UID
+  final String userID; // Line to receive the UID
 
   RegistrationPageClass(
       {required this.userID}); // Modify constructor to accept UID
