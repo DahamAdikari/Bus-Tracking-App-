@@ -1,0 +1,12 @@
+Daham
+1. Fetch the Registration form from the Registration collection to the Admin.
+2. Make a list of bus that are wanted to Register as the first page of Admin.
+
+Sahan
+1.
+
+Rashmi
+1.
+
+Dishmi
+1.
