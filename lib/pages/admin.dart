@@ -5,6 +5,10 @@ import 'package:test_4/addbusHalt.dart';
 import 'package:test_4/pages/SelectCurrentAdmin.dart';
 
 class AdminPage extends StatefulWidget {
+  final Map<String, dynamic>? data; // Receive data from RegistrationListPage
+
+  AdminPage({Key? key, this.data}) : super(key: key);
+
   @override
   _AdminPageState createState() => _AdminPageState();
 }
@@ -20,6 +24,25 @@ class _AdminPageState extends State<AdminPage> {
   List<Map<String, dynamic>> _busHalts = [];
 
   @override
+  void initState() {
+    super.initState();
+
+    if (widget.data != null) {
+      busID = widget.data!['busID'];
+      busName = widget.data!['busName'];
+      routeNum = widget.data!['routeNum'];
+      sourceLocation = widget.data!['sourceLocation'];
+      destinationLocation = widget.data!['destinationLocation'];
+      _selectedLocation =
+          widget.data!['latitude'] != null && widget.data!['longitude'] != null
+              ? LatLng(widget.data!['latitude'], widget.data!['longitude'])
+              : null;
+      _busHalts =
+          List<Map<String, dynamic>>.from(widget.data!['busHalts'] ?? []);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -33,6 +56,7 @@ class _AdminPageState extends State<AdminPage> {
             child: Column(
               children: [
                 TextFormField(
+                  initialValue: busID,
                   decoration: InputDecoration(labelText: 'Bus ID'),
                   onSaved: (value) {
                     busID = value;
@@ -45,6 +69,7 @@ class _AdminPageState extends State<AdminPage> {
                   },
                 ),
                 TextFormField(
+                  initialValue: busName,
                   decoration: InputDecoration(labelText: 'Bus Name'),
                   onSaved: (value) {
                     busName = value;
@@ -57,6 +82,7 @@ class _AdminPageState extends State<AdminPage> {
                   },
                 ),
                 TextFormField(
+                  initialValue: routeNum,
                   decoration: InputDecoration(labelText: 'Route Number'),
                   onSaved: (value) {
                     routeNum = value;
@@ -69,6 +95,7 @@ class _AdminPageState extends State<AdminPage> {
                   },
                 ),
                 TextFormField(
+                  initialValue: sourceLocation,
                   decoration: InputDecoration(labelText: 'Source Location'),
                   onSaved: (value) {
                     sourceLocation = value;
@@ -81,6 +108,7 @@ class _AdminPageState extends State<AdminPage> {
                   },
                 ),
                 TextFormField(
+                  initialValue: destinationLocation,
                   decoration:
                       InputDecoration(labelText: 'Destination Location'),
                   onSaved: (value) {
@@ -181,15 +209,14 @@ class _AdminPageState extends State<AdminPage> {
         'routeNum': routeNum,
         'sourceLocation': sourceLocation,
         'destinationLocation': destinationLocation,
-        'latitude': _selectedLocation?.latitude, // Store latitude
-        'longitude': _selectedLocation?.longitude, // Store longitude
+        'latitude': _selectedLocation?.latitude,
+        'longitude': _selectedLocation?.longitude,
         'busHalts': _busHalts,
       }).then((_) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Bus added successfully')),
         );
 
-        // Clear the form and reset state
         _formKey.currentState!.reset();
         setState(() {
           busID = null;
