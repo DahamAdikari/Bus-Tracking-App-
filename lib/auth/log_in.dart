@@ -92,6 +92,7 @@ class LogInScreen extends StatelessWidget {
               children: [
                 Column(
                   children: [
+
                     Image(
                         image: AssetImage(AppLogoImage),
                         height: size.height * 0.2),
