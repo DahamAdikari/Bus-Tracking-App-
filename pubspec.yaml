@@ -100,6 +100,7 @@ flutter:
     - assets/images/image3.png
     - assets/logos/
     - assets/images/search_bus.png
+    - assets/images/seat_booking_images/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

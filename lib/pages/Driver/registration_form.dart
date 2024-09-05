@@ -2,19 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:test_4/addbusHalt.dart';
+import 'package:test_4/pages/Driver/Reg_seats.dart';
 import 'package:test_4/pages/SelectCurrentAdmin.dart';
 
-class AdminPage extends StatefulWidget {
-  final Map<String, dynamic>? data; // Receive data from RegistrationListPage
+class RegistrationPageClass extends StatefulWidget {
+  final String userID; // Line to receive the UID
 
-  AdminPage({Key? key, this.data}) : super(key: key);
+  RegistrationPageClass(
+      {required this.userID}); // Modify constructor to accept UID
 
   @override
-  _AdminPageState createState() => _AdminPageState();
+  RegistrationPage createState() => RegistrationPage();
 }
 
-class _AdminPageState extends State<AdminPage> {
+class RegistrationPage extends State<RegistrationPageClass> {
   final _formKey = GlobalKey<FormState>();
+
   String? busID;
   String? busName;
   String? routeNum;
@@ -23,23 +26,12 @@ class _AdminPageState extends State<AdminPage> {
   LatLng? _selectedLocation; // Store selected location
   List<Map<String, dynamic>> _busHalts = [];
 
+  late String userID;
+
   @override
   void initState() {
     super.initState();
-
-    if (widget.data != null) {
-      busID = widget.data!['busID'];
-      busName = widget.data!['busName'];
-      routeNum = widget.data!['routeNum'];
-      sourceLocation = widget.data!['sourceLocation'];
-      destinationLocation = widget.data!['destinationLocation'];
-      _selectedLocation =
-          widget.data!['latitude'] != null && widget.data!['longitude'] != null
-              ? LatLng(widget.data!['latitude'], widget.data!['longitude'])
-              : null;
-      _busHalts =
-          List<Map<String, dynamic>>.from(widget.data!['busHalts'] ?? []);
-    }
+    userID = widget.userID; // Initialize userID with value from widget
   }
 
   @override
@@ -56,7 +48,6 @@ class _AdminPageState extends State<AdminPage> {
             child: Column(
               children: [
                 TextFormField(
-                  initialValue: busID,
                   decoration: InputDecoration(labelText: 'Bus ID'),
                   onSaved: (value) {
                     busID = value;
@@ -69,7 +60,6 @@ class _AdminPageState extends State<AdminPage> {
                   },
                 ),
                 TextFormField(
-                  initialValue: busName,
                   decoration: InputDecoration(labelText: 'Bus Name'),
                   onSaved: (value) {
                     busName = value;
@@ -82,7 +72,6 @@ class _AdminPageState extends State<AdminPage> {
                   },
                 ),
                 TextFormField(
-                  initialValue: routeNum,
                   decoration: InputDecoration(labelText: 'Route Number'),
                   onSaved: (value) {
                     routeNum = value;
@@ -95,7 +84,6 @@ class _AdminPageState extends State<AdminPage> {
                   },
                 ),
                 TextFormField(
-                  initialValue: sourceLocation,
                   decoration: InputDecoration(labelText: 'Source Location'),
                   onSaved: (value) {
                     sourceLocation = value;
@@ -108,7 +96,6 @@ class _AdminPageState extends State<AdminPage> {
                   },
                 ),
                 TextFormField(
-                  initialValue: destinationLocation,
                   decoration:
                       InputDecoration(labelText: 'Destination Location'),
                   onSaved: (value) {
@@ -163,6 +150,25 @@ class _AdminPageState extends State<AdminPage> {
                   },
                   child: Text('Add Current Location of the Bus'),
                 ),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue, // Set button color to blue
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            RegSeats(), // Navigate to RegSeats
+                      ),
+                    );
+                  },
+                  child: Text(
+                    'Add Seats',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
                 if (_selectedLocation != null)
                   Text(
                       'Selected Location: Lat: ${_selectedLocation!.latitude}, Lng: ${_selectedLocation!.longitude}'),
@@ -199,24 +205,22 @@ class _AdminPageState extends State<AdminPage> {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
-      FirebaseFirestore.instance
-          .collection('driver')
-          .doc('BfVpZVAWiMMGbQj2Uohdm2COaUG2')
-          .collection('buses')
-          .add({
+      FirebaseFirestore.instance.collection('registration').add({
+        'userID': userID, // Add userID
         'busID': busID,
         'busName': busName,
         'routeNum': routeNum,
         'sourceLocation': sourceLocation,
         'destinationLocation': destinationLocation,
-        'latitude': _selectedLocation?.latitude,
-        'longitude': _selectedLocation?.longitude,
+        'latitude': _selectedLocation?.latitude, // Store latitude
+        'longitude': _selectedLocation?.longitude, // Store longitude
         'busHalts': _busHalts,
       }).then((_) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Bus added successfully')),
         );
 
+        // Clear the form and reset state
         _formKey.currentState!.reset();
         setState(() {
           busID = null;
