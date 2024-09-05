@@ -14,14 +14,19 @@ class BusListPagePassenger extends StatelessWidget {
       appBar: AppBar(
         title: Text('Available Buses'),
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection('buses').snapshots(),
+      body: FutureBuilder<List<QueryDocumentSnapshot>>(
+        future: _fetchBuses(),
         builder: (context, snapshot) {
-          if (!snapshot.hasData) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
           }
 
-          var busDocuments = snapshot.data!.docs;
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(
+                child: Text('No buses found matching your criteria.'));
+          }
+
+          var busDocuments = snapshot.data!;
 
           // Filter buses based on source, destination, and bus halts
           var filteredBuses = busDocuments.where((busData) {
@@ -73,5 +78,22 @@ class BusListPagePassenger extends StatelessWidget {
         },
       ),
     );
+  }
+
+  Future<List<QueryDocumentSnapshot>> _fetchBuses() async {
+    List<QueryDocumentSnapshot> buses = [];
+
+    // Get all driver documents
+    QuerySnapshot driverSnapshot =
+        await FirebaseFirestore.instance.collection('driver').get();
+
+    for (var driverDoc in driverSnapshot.docs) {
+      // Get the buses subcollection for each driver
+      QuerySnapshot busSnapshot =
+          await driverDoc.reference.collection('buses').get();
+      buses.addAll(busSnapshot.docs);
+    }
+
+    return buses;
   }
 }
