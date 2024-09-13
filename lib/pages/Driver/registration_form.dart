@@ -215,6 +215,7 @@ class RegistrationPage extends State<RegistrationPageClass> {
         'latitude': _selectedLocation?.latitude, // Store latitude
         'longitude': _selectedLocation?.longitude, // Store longitude
         'busHalts': _busHalts,
+        'isOnline': false, // Add the isOnline field with default value false
       }).then((_) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Bus added successfully')),

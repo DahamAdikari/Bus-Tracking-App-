@@ -7,8 +7,9 @@ import 'package:test_4/pages/Driver/editbusdetails_driver.dart';
 
 class BusDetailsPage extends StatefulWidget {
   final String busId;
+  final String userID;
 
-  BusDetailsPage({required this.busId});
+  BusDetailsPage({required this.busId, required this.userID});
 
   @override
   _BusDetailsPageState createState() => _BusDetailsPageState();
@@ -28,10 +29,14 @@ class _BusDetailsPageState extends State<BusDetailsPage> {
 
   Future<void> _loadBusData() async {
     try {
+      // Fetch data from driver/{userID}/buses/{busId}
       DocumentSnapshot data = await FirebaseFirestore.instance
+          .collection('driver')
+          .doc(widget.userID)
           .collection('buses')
           .doc(widget.busId)
           .get();
+
       setState(() {
         busData = data;
         isOnline = busData!['isOnline'] ?? false; // Initialize the online state
@@ -47,6 +52,8 @@ class _BusDetailsPageState extends State<BusDetailsPage> {
       // Go offline
       _locationSubscription?.cancel();
       await FirebaseFirestore.instance
+          .collection('driver')
+          .doc(widget.userID)
           .collection('buses')
           .doc(widget.busId)
           .update({'isOnline': false});
@@ -57,6 +64,8 @@ class _BusDetailsPageState extends State<BusDetailsPage> {
       // Go online
       await _startLocationUpdates();
       await FirebaseFirestore.instance
+          .collection('driver')
+          .doc(widget.userID)
           .collection('buses')
           .doc(widget.busId)
           .update({'isOnline': true});
@@ -93,6 +102,8 @@ class _BusDetailsPageState extends State<BusDetailsPage> {
       if (currentLocation.latitude != null &&
           currentLocation.longitude != null) {
         FirebaseFirestore.instance
+            .collection('driver')
+            .doc(widget.userID)
             .collection('buses')
             .doc(widget.busId)
             .update({
@@ -216,6 +227,7 @@ class _BusDetailsPageState extends State<BusDetailsPage> {
                               MaterialPageRoute(
                                 builder: (context) => BusLocationMapPage(
                                   busId: widget.busId,
+                                  userID: widget.userID,
                                 ),
                               ),
                             );
