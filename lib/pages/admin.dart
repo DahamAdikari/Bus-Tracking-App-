@@ -212,6 +212,7 @@ class _AdminPageState extends State<AdminPage> {
         'latitude': _selectedLocation?.latitude,
         'longitude': _selectedLocation?.longitude,
         'busHalts': _busHalts,
+        'isOnline': false,
       }).then((_) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Bus added successfully')),

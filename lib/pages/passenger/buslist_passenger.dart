@@ -14,7 +14,7 @@ class BusListPagePassenger extends StatelessWidget {
       appBar: AppBar(
         title: Text('Available Buses'),
       ),
-      body: FutureBuilder<List<QueryDocumentSnapshot>>(
+      body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _fetchBuses(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -30,9 +30,9 @@ class BusListPagePassenger extends StatelessWidget {
 
           // Filter buses based on source, destination, and bus halts
           var filteredBuses = busDocuments.where((busData) {
-            var busSource = busData['sourceLocation'];
-            var busDestination = busData['destinationLocation'];
-            var busHalts = busData['busHalts'] as List<dynamic>;
+            var busSource = busData['bus']['sourceLocation'];
+            var busDestination = busData['bus']['destinationLocation'];
+            var busHalts = busData['bus']['busHalts'] as List<dynamic>;
 
             bool matchesDirectly =
                 (busSource == source && busDestination == destination);
@@ -54,11 +54,11 @@ class BusListPagePassenger extends StatelessWidget {
               var busData = filteredBuses[index];
 
               return ListTile(
-                title: Text('Bus: ${busData['busName']}'),
+                title: Text('Bus: ${busData['bus']['busName']}'),
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Route Number: ${busData['routeNum']}'),
+                    Text('Route Number: ${busData['bus']['routeNum']}'),
                     SizedBox(height: 10),
                   ],
                 ),
@@ -67,8 +67,10 @@ class BusListPagePassenger extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) =>
-                          BusDetailsPagePassenger(busId: busData.id),
+                      builder: (context) => BusDetailsPagePassenger(
+                        busId: busData['bus'].id,
+                        driverId: busData['driverId'],
+                      ),
                     ),
                   );
                 },
@@ -80,8 +82,8 @@ class BusListPagePassenger extends StatelessWidget {
     );
   }
 
-  Future<List<QueryDocumentSnapshot>> _fetchBuses() async {
-    List<QueryDocumentSnapshot> buses = [];
+  Future<List<Map<String, dynamic>>> _fetchBuses() async {
+    List<Map<String, dynamic>> buses = [];
 
     // Get all driver documents
     QuerySnapshot driverSnapshot =
@@ -91,7 +93,12 @@ class BusListPagePassenger extends StatelessWidget {
       // Get the buses subcollection for each driver
       QuerySnapshot busSnapshot =
           await driverDoc.reference.collection('buses').get();
-      buses.addAll(busSnapshot.docs);
+      for (var busDoc in busSnapshot.docs) {
+        buses.add({
+          'bus': busDoc,
+          'driverId': driverDoc.id,
+        });
+      }
     }
 
     return buses;

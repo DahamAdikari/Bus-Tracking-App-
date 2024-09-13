@@ -39,18 +39,17 @@ class _BusListPageDriverState extends State<BusListPageDriver> {
                   ? Center(child: Text('User not logged in!'))
                   : StreamBuilder<QuerySnapshot>(
                       stream: FirebaseFirestore.instance
-                          //TEMPORARLILY fetch from the registration Collection
-                          .collection(
-                              'registration') //Delete this line and un-comment below lines
+                          // //TEMPORARLILY fetch from the registration Collection
+                          // .collection(
+                          //     'registration') //Delete this line and un-comment below lines
 
                           //Original code for fetching from the original location
-                          // .collection(
-                          //     'driver')
-                          //      // Assuming 'driver' is your top-level collection
-                          // .doc(
-                          //     userID) // Use the userID to reference the specific user document
-                          // .collection(
-                          //     'buses') // Access the 'buses' sub-collection
+                          .collection('driver')
+                          // Assuming 'driver' is your top-level collection
+                          .doc(
+                              userID) // Use the userID to reference the specific user document
+                          .collection(
+                              'buses') // Access the 'buses' sub-collection
                           .snapshots(),
                       builder: (context, snapshot) {
                         if (!snapshot.hasData) {
@@ -80,13 +79,25 @@ class _BusListPageDriverState extends State<BusListPageDriver> {
                                 subtitle: Text(
                                     '${bus['sourceLocation']} -> ${bus['destinationLocation']}'),
                                 onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          BusDetailsPage(busId: bus.id),
-                                    ),
-                                  );
+                                  if (userID != null) {
+                                    final busData = bus.data() as Map<String,
+                                        dynamic>; // Get the bus document data
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => BusDetailsPage(
+                                          busId: bus
+                                              .id, // Use the document ID of the selected bus
+                                          userID: userID, // Pass the userID
+                                        ),
+                                      ),
+                                    );
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                          content: Text('User not logged in!')),
+                                    );
+                                  }
                                 },
                               ),
                             );

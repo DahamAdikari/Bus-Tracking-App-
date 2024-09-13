@@ -17,8 +17,7 @@ class RegSeats extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 GestureDetector(
-                  onTap: () {
-                  },
+                  onTap: () {},
                   child: Container(
                     padding: EdgeInsets.all(8.0),
                     decoration: BoxDecoration(
@@ -37,8 +36,7 @@ class RegSeats extends StatelessWidget {
                   ),
                 ),
                 GestureDetector(
-                  onTap: () {
-                  },
+                  onTap: () {},
                   child: Container(
                     padding: EdgeInsets.all(8.0),
                     decoration: BoxDecoration(
@@ -57,8 +55,7 @@ class RegSeats extends StatelessWidget {
                   ),
                 ),
                 GestureDetector(
-                  onTap: () {
-                  },
+                  onTap: () {},
                   child: Container(
                     padding: EdgeInsets.all(8.0),
                     decoration: BoxDecoration(
@@ -90,8 +87,7 @@ class RegSeats extends StatelessWidget {
             SizedBox(height: 20),
             Center(
               child: ElevatedButton(
-                onPressed: () {
-                },
+                onPressed: () {},
                 child: Text('Check'),
               ),
             ),

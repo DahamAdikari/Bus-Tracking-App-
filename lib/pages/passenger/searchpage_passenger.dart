@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:test_4/pages/passenger/buslist_passenger.dart';
 
 class SearchBusPage extends StatefulWidget {
@@ -11,6 +12,50 @@ class _SearchBusPageState extends State<SearchBusPage> {
   String? sourceLocation;
   String? destinationLocation;
 
+  // Create controllers for source and destination TextFormField
+  TextEditingController sourceController = TextEditingController();
+  TextEditingController destinationController = TextEditingController();
+
+  List<String> sourceSuggestions = [];
+  List<String> destinationSuggestions = [];
+
+  // Fetch source and destination locations from Firestore
+  Future<void> fetchLocations(String searchText, bool isSource) async {
+    List<String> suggestions = [];
+
+    // Query Firestore
+    final querySnapshot =
+        await FirebaseFirestore.instance.collection('driver').get();
+
+    for (var driverDoc in querySnapshot.docs) {
+      final busesSnapshot = await driverDoc.reference.collection('buses').get();
+
+      for (var busDoc in busesSnapshot.docs) {
+        String fetchedLocation;
+        if (isSource) {
+          fetchedLocation = busDoc['sourceLocation'];
+        } else {
+          fetchedLocation = busDoc['destinationLocation'];
+        }
+
+        if (fetchedLocation
+            .toLowerCase()
+            .startsWith(searchText.toLowerCase())) {
+          suggestions.add(fetchedLocation);
+        }
+      }
+    }
+
+    // Update state with fetched suggestions
+    setState(() {
+      if (isSource) {
+        sourceSuggestions = suggestions;
+      } else {
+        destinationSuggestions = suggestions;
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,7 +66,7 @@ class _SearchBusPageState extends State<SearchBusPage> {
         ),
         backgroundColor: Colors.lightBlue,
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
@@ -33,10 +78,23 @@ class _SearchBusPageState extends State<SearchBusPage> {
                 style: const TextStyle(fontSize: 20),
               ),
               Center(
-                child: Image.asset('assets/images/search_bus.png'),
+                child: Image.asset(
+                  'assets/images/search_bus.png',
+                  height: 200, // Adjust the height to prevent overflow
+                  fit: BoxFit.cover,
+                ),
               ),
+              SizedBox(height: 20),
+
+              // Source Location TextFormField with autocomplete dropdown
               TextFormField(
+                controller: sourceController, // Connect controller
                 decoration: InputDecoration(labelText: 'Source Location'),
+                onChanged: (value) {
+                  if (value.isNotEmpty) {
+                    fetchLocations(value, true); // Fetch source locations
+                  }
+                },
                 onSaved: (value) {
                   sourceLocation = value;
                 },
@@ -47,8 +105,36 @@ class _SearchBusPageState extends State<SearchBusPage> {
                   return null;
                 },
               ),
+              if (sourceSuggestions.isNotEmpty)
+                Container(
+                  height: 100,
+                  child: ListView.builder(
+                    itemCount: sourceSuggestions.length,
+                    itemBuilder: (context, index) {
+                      return ListTile(
+                        title: Text(sourceSuggestions[index]),
+                        onTap: () {
+                          setState(() {
+                            sourceController.text = sourceSuggestions[index];
+                            sourceLocation = sourceSuggestions[
+                                index]; // Set the selected value
+                            sourceSuggestions = []; // Clear suggestions
+                          });
+                        },
+                      );
+                    },
+                  ),
+                ),
+
+              // Destination Location TextFormField with autocomplete dropdown
               TextFormField(
+                controller: destinationController, // Connect controller
                 decoration: InputDecoration(labelText: 'Destination Location'),
+                onChanged: (value) {
+                  if (value.isNotEmpty) {
+                    fetchLocations(value, false); // Fetch destination locations
+                  }
+                },
                 onSaved: (value) {
                   destinationLocation = value;
                 },
@@ -59,6 +145,28 @@ class _SearchBusPageState extends State<SearchBusPage> {
                   return null;
                 },
               ),
+              if (destinationSuggestions.isNotEmpty)
+                Container(
+                  height: 100,
+                  child: ListView.builder(
+                    itemCount: destinationSuggestions.length,
+                    itemBuilder: (context, index) {
+                      return ListTile(
+                        title: Text(destinationSuggestions[index]),
+                        onTap: () {
+                          setState(() {
+                            destinationController.text =
+                                destinationSuggestions[index];
+                            destinationLocation = destinationSuggestions[
+                                index]; // Set the selected value
+                            destinationSuggestions = []; // Clear suggestions
+                          });
+                        },
+                      );
+                    },
+                  ),
+                ),
+
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
