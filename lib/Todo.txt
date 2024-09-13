@@ -5,7 +5,8 @@ Daham
 4. In Driver's selected bus detail page, don't go online if location permission is not given
 
 Sahan
-1.
+1. Settle the entering phase
+2. If someone logged in, stay him/her logged in until he/she log out
 
 Rashmi
 1. create seat models in the firebase
