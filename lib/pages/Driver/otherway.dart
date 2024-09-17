@@ -4,6 +4,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:test_4/addbusHalt.dart';
 import 'package:test_4/pages/SelectCurrentAdmin.dart';
 import 'package:intl/intl.dart'; // Add this for time formatting
+import './Reg_seats.dart';
 
 class AddBusPage extends StatefulWidget {
   final String userID;
@@ -85,6 +86,20 @@ class _AddBusPageState extends State<AddBusPage> {
                   }
                 },
                 child: Text('Add Current Location of the Bus'),
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  // Navigate to RegSeats page
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          RegSeats(), // Ensure RegSeats is implemented
+                    ),
+                  );
+                },
+                child: Text('Add Seats'),
               ),
               if (_selectedLocation != null)
                 Text(
