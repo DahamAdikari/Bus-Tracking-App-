@@ -1,15 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:test_4/addbusHalt.dart';
-import 'package:test_4/pages/Driver/Reg_seats.dart';
-import 'package:test_4/pages/SelectCurrentAdmin.dart';
+import './otherway.dart';
 
 class RegistrationPageClass extends StatefulWidget {
-  final String userID; // Line to receive the UID
+  final String userID;
 
-  RegistrationPageClass(
-      {required this.userID}); // Modify constructor to accept UID
+  RegistrationPageClass({required this.userID});
 
   @override
   RegistrationPage createState() => RegistrationPage();
@@ -17,21 +12,22 @@ class RegistrationPageClass extends StatefulWidget {
 
 class RegistrationPage extends State<RegistrationPageClass> {
   final _formKey = GlobalKey<FormState>();
+  List<Map<String, String>> _timetable = [
+    {'departureTime': '', 'arrivalTime': ''}
+  ]; // Default timetable
 
   String? busID;
   String? busName;
   String? routeNum;
   String? sourceLocation;
   String? destinationLocation;
-  LatLng? _selectedLocation; // Store selected location
-  List<Map<String, dynamic>> _busHalts = [];
 
   late String userID;
 
   @override
   void initState() {
     super.initState();
-    userID = widget.userID; // Initialize userID with value from widget
+    userID = widget.userID;
   }
 
   @override
@@ -109,89 +105,38 @@ class RegistrationPage extends State<RegistrationPageClass> {
                   },
                 ),
                 SizedBox(height: 20),
+                Text('Timetable',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                _buildTimetable(),
+                SizedBox(height: 10),
                 ElevatedButton(
-                  onPressed: () async {
-                    final result = await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => AddBusHaltPage(),
-                      ),
-                    );
-
-                    if (result != null) {
-                      setState(() {
-                        _busHalts.add({
-                          'name': result['name'],
-                          'location': {
-                            'latitude': result['location'].latitude,
-                            'longitude': result['location'].longitude,
-                          },
-                        });
-                      });
-                    }
-                  },
-                  child: Text('Add Bus Halt'),
+                  onPressed: _addTimetableRow,
+                  child: Text('Add Timetable Row'),
                 ),
                 SizedBox(height: 20),
                 ElevatedButton(
-                  onPressed: () async {
-                    final result = await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => SelectCurrentLocationPage(),
-                      ),
-                    );
-
-                    if (result != null) {
-                      setState(() {
-                        _selectedLocation = result;
-                      });
-                    }
-                  },
-                  child: Text('Add Current Location of the Bus'),
-                ),
-                SizedBox(height: 20),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue, // Set button color to blue
-                  ),
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            RegSeats(), // Navigate to RegSeats
-                      ),
-                    );
+                    if (_formKey.currentState!.validate()) {
+                      _formKey.currentState!.save();
+
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AddBusPage(
+                            userID: userID,
+                            busID: busID!,
+                            busName: busName!,
+                            routeNum: routeNum!,
+                            sourceLocation: sourceLocation!,
+                            destinationLocation: destinationLocation!,
+                            timetable_org:
+                                _timetable, // Pass timetable to the next page
+                          ),
+                        ),
+                      );
+                    }
                   },
-                  child: Text(
-                    'Add Seats',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-                if (_selectedLocation != null)
-                  Text(
-                      'Selected Location: Lat: ${_selectedLocation!.latitude}, Lng: ${_selectedLocation!.longitude}'),
-                SizedBox(height: 20),
-                Text(
-                  'Bus Halts:',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                ..._busHalts.map((halt) {
-                  final location = halt['location'];
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(halt['name']),
-                      Text(
-                          'Lat: ${location['latitude']}, Lng: ${location['longitude']}'),
-                    ],
-                  );
-                }).toList(),
-                SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: _submitForm,
-                  child: Text('Add Bus'),
+                  child: Text('Next'),
                 ),
               ],
             ),
@@ -201,42 +146,85 @@ class RegistrationPage extends State<RegistrationPageClass> {
     );
   }
 
-  void _submitForm() {
-    if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
-
-      FirebaseFirestore.instance.collection('registration').add({
-        'userID': userID, // Add userID
-        'busID': busID,
-        'busName': busName,
-        'routeNum': routeNum,
-        'sourceLocation': sourceLocation,
-        'destinationLocation': destinationLocation,
-        'latitude': _selectedLocation?.latitude, // Store latitude
-        'longitude': _selectedLocation?.longitude, // Store longitude
-        'busHalts': _busHalts,
-        'isOnline': false, // Add the isOnline field with default value false
-      }).then((_) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Bus added successfully')),
+  // Widget to build timetable input section
+  Widget _buildTimetable() {
+    return Column(
+      children: _timetable.map((entry) {
+        int index = _timetable.indexOf(entry);
+        return Row(
+          children: [
+            Expanded(
+              child: TextFormField(
+                readOnly:
+                    true, // Make it read-only so the user can't type directly
+                decoration: InputDecoration(labelText: 'Departure Time'),
+                controller: TextEditingController(
+                    text: entry['departureTime']), // Display selected time
+                onTap: () async {
+                  TimeOfDay? pickedTime = await showTimePicker(
+                    context: context,
+                    initialTime: TimeOfDay.now(),
+                  );
+                  if (pickedTime != null) {
+                    setState(() {
+                      _timetable[index]['departureTime'] =
+                          _formatTime(pickedTime);
+                    });
+                  }
+                },
+              ),
+            ),
+            SizedBox(width: 10),
+            Expanded(
+              child: TextFormField(
+                readOnly: true, // Make it read-only
+                decoration: InputDecoration(labelText: 'Arrival Time'),
+                controller: TextEditingController(
+                    text: entry['arrivalTime']), // Display selected time
+                onTap: () async {
+                  TimeOfDay? pickedTime = await showTimePicker(
+                    context: context,
+                    initialTime: TimeOfDay.now(),
+                  );
+                  if (pickedTime != null) {
+                    setState(() {
+                      _timetable[index]['arrivalTime'] =
+                          _formatTime(pickedTime);
+                    });
+                  }
+                },
+              ),
+            ),
+            IconButton(
+              icon: Icon(Icons.delete),
+              onPressed: () {
+                setState(() {
+                  _timetable.removeAt(index);
+                });
+              },
+            ),
+          ],
         );
+      }).toList(),
+    );
+  }
 
-        // Clear the form and reset state
-        _formKey.currentState!.reset();
-        setState(() {
-          busID = null;
-          busName = null;
-          routeNum = null;
-          sourceLocation = null;
-          destinationLocation = null;
-          _selectedLocation = null;
-          _busHalts.clear();
-        });
-      }).catchError((error) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to add bus: $error')),
-        );
+  // Add new timetable row
+  void _addTimetableRow() {
+    setState(() {
+      _timetable.add({
+        'departureTime': '',
+        'arrivalTime': '',
       });
-    }
+    });
+  }
+
+  // Format time to 24-hour format
+  String _formatTime(TimeOfDay time) {
+    final now = DateTime.now();
+    final dt = DateTime(now.year, now.month, now.day, time.hour, time.minute);
+    final formattedTime =
+        '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+    return formattedTime;
   }
 }
