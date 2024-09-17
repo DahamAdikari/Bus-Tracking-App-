@@ -11,7 +11,7 @@ Sahan
 Rashmi
 1. create seat models according to the user input in registration form - Done
 2. save the seat details in firebase
-3. develop seat booking and blocking part
+3. develop seat booking from pasenger and blocking part from driver
 
 Dishmi
 1.
