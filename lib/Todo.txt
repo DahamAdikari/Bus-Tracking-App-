@@ -9,7 +9,9 @@ Sahan
 2. If someone logged in, stay him/her logged in until he/she log out
 
 Rashmi
-1. create seat models in the firebase
+1. create seat models according to the user input in registration form - Done
+2. save the seat details in firebase
+3. develop seat booking and blocking part
 
 Dishmi
 1.
