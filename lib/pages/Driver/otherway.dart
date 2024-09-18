@@ -265,7 +265,7 @@ class _AddBusPageState extends State<AddBusPage> {
   }
 
   void _submitBus() {
-    List<Map<String, dynamic>> flatSeatLayout =
+    List<Map<String, dynamic>>? flatSeatLayout =
         flattenSeatLayout(_seatData?['seatLayout']);
 
     FirebaseFirestore.instance.collection('registration').add({
