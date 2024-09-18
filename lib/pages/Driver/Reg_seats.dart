@@ -15,56 +15,66 @@ class _RegSeatsState extends State<RegSeats> {
 
   // Function to create seat layout
   void createSeatLayout() {
-    if (rows <= 0 || seatCount <= 0) {
-      seatLayout.clear();
-      setState(() {});
-      return;
-    }
-
+  if (rows <= 0 || seatCount <= 0) {
     seatLayout.clear();
-    int columns = 0;
+    setState(() {});
+    return;
+  }
 
-    switch (selectedModel) {
-      case 1:
-        columns = 4; // 1x2 model
-        break;
-      case 2:
-        columns = 5; // 2x2 model
-        break;
-      case 3:
-        columns = 6; // 2x3 model
-        break;
-    }
+  seatLayout.clear();
+  int columns = 0;
 
-    int remainingSeats = seatCount;
+  // Determine columns based on the bus model selected
+  switch (selectedModel) {
+    case 1:
+      columns = 4; // 1x2 model
+      break;
+    case 2:
+      columns = 5; // 2x2 model
+      break;
+    case 3:
+      columns = 6; // 2x3 model
+      break;
+  }
 
-    for (int row = 0; row < rows; row++) {
-      List<Map<String, dynamic>> currentRow = [];
+  int remainingSeats = seatCount;
+
+  for (int row = 0; row < rows; row++) {
+    List<Map<String, dynamic>> currentRow = [];
+
+    // For the last row, just mark all as available
+    if (row == rows - 1) {
+      for (int col = 0; col < columns; col++) {
+        if (remainingSeats > 0) {
+          currentRow.add({'row': row, 'col': col, 'status': 'available'});
+          remainingSeats--;
+        } else {
+          currentRow.add({'row': row, 'col': col, 'status': 'Empty'});
+        }
+      }
+    } else {
       for (int col = 0; col < columns; col++) {
         if (remainingSeats > 0) {
           if ((selectedModel == 1 && col == 1) ||
               (selectedModel == 2 && col == 2) ||
               (selectedModel == 3 && col == 2)) {
-            currentRow
-                .add({'row': row, 'col': col, 'status': 'Empty'}); // Add space
+            currentRow.add({'row': row, 'col': col, 'status': 'Empty'}); // Space
           } else {
-            currentRow.add(
-                {'row': row, 'col': col, 'status': 'available'}); // Add seat
+            currentRow.add({'row': row, 'col': col, 'status': 'available'}); // Seat
             remainingSeats--;
           }
         } else {
-          currentRow.add({
-            'row': row,
-            'col': col,
-            'status': 'Empty'
-          }); // No more seats, just empty
+          currentRow.add({'row': row, 'col': col, 'status': 'Empty'}); // No more seats, just empty
         }
       }
-      seatLayout.add(currentRow);
     }
 
-    setState(() {});
+    seatLayout.add(currentRow);
   }
+
+  setState(() {}); // Refresh the UI
+}
+
 
   // Function to build the seat layout
   Widget buildSeatLayout() {
