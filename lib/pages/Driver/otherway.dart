@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:test_4/addbusHalt.dart';
 import 'package:test_4/pages/SelectCurrentAdmin.dart';
-import 'package:intl/intl.dart'; // Add this for time formatting
+import 'package:intl/intl.dart';
 import './Reg_seats.dart';
 
 class AddBusPage extends StatefulWidget {
@@ -13,7 +13,7 @@ class AddBusPage extends StatefulWidget {
   final String routeNum;
   final String sourceLocation;
   final String destinationLocation;
-  final List<Map<String, String>> timetable_org; // Added timetableOrg parameter
+  final List<Map<String, String>> timetable_org;
 
   AddBusPage({
     required this.userID,
@@ -32,8 +32,9 @@ class AddBusPage extends StatefulWidget {
 class _AddBusPageState extends State<AddBusPage> {
   LatLng? _selectedLocation;
   List<Map<String, dynamic>> _busHalts = [];
-  bool hasReturnTrip = false; // Checkbox state
-  List<Map<String, dynamic>> _timetable = []; // To store timetable entries
+  bool hasReturnTrip = false;
+  List<Map<String, dynamic>> _timetable = [];
+  Map<String, dynamic>? _seatData;
 
   @override
   Widget build(BuildContext context) {
@@ -89,21 +90,34 @@ class _AddBusPageState extends State<AddBusPage> {
               ),
               SizedBox(height: 20),
               ElevatedButton(
-                onPressed: () {
-                  // Navigate to RegSeats page
-                  Navigator.push(
+                onPressed: () async {
+                  final result = await Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) =>
-                          RegSeats(), // Ensure RegSeats is implemented
+                      builder: (context) => RegSeats(),
                     ),
                   );
+
+                  if (result != null) {
+                    setState(() {
+                      _seatData = result;
+                    });
+                  }
                 },
                 child: Text('Add Seats'),
               ),
               if (_selectedLocation != null)
                 Text(
                     'Selected Location: Lat: ${_selectedLocation!.latitude}, Lng: ${_selectedLocation!.longitude}'),
+              if (_seatData != null)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Selected Seat Model: ${_seatData!['selectedModel']}'),
+                    Text('Total Seats: ${_seatData!['seatCount']}'),
+                    Text('Total Rows: ${_seatData!['rows']}'),
+                  ],
+                ),
               SizedBox(height: 20),
               CheckboxListTile(
                 title: Text(
@@ -154,7 +168,6 @@ class _AddBusPageState extends State<AddBusPage> {
     );
   }
 
-  // Widget to build timetable input section
   Widget _buildTimetable() {
     return Column(
       children: _timetable.map((entry) {
@@ -218,16 +231,13 @@ class _AddBusPageState extends State<AddBusPage> {
     );
   }
 
-  // Helper function to format TimeOfDay to a string (e.g., 'HH:mm')
   String _formatTimeOfDay(TimeOfDay time) {
     final now = DateTime.now();
     final dt = DateTime(now.year, now.month, now.day, time.hour, time.minute);
-    final format = DateFormat(
-        'HH:mm'); // Use any format you want (e.g., 'HH:mm a' for AM/PM)
+    final format = DateFormat('HH:mm');
     return format.format(dt);
   }
 
-  // Add new timetable row
   void _addTimetableRow() {
     setState(() {
       _timetable.add({
@@ -237,8 +247,27 @@ class _AddBusPageState extends State<AddBusPage> {
     });
   }
 
-  // Submit bus details to Firestore
+  List<Map<String, dynamic>> flattenSeatLayout(
+      List<List<Map<String, dynamic>>> seatLayout) {
+    List<Map<String, dynamic>> flatList = [];
+
+    for (int row = 0; row < seatLayout.length; row++) {
+      for (int col = 0; col < seatLayout[row].length; col++) {
+        Map<String, dynamic> seat = seatLayout[row][col];
+        flatList.add({
+          'row': row,
+          'col': col,
+          'status': seat['status'],
+        });
+      }
+    }
+    return flatList;
+  }
+
   void _submitBus() {
+    List<Map<String, dynamic>> flatSeatLayout =
+        flattenSeatLayout(_seatData?['seatLayout']);
+
     FirebaseFirestore.instance.collection('registration').add({
       'userID': widget.userID,
       'busID': widget.busID,
@@ -250,17 +279,21 @@ class _AddBusPageState extends State<AddBusPage> {
       'longitude': _selectedLocation?.longitude,
       'busHalts': _busHalts,
       'timetableorg': widget.timetable_org,
-      'hasReturnTrip': hasReturnTrip, // Store the checkbox value
-      'timetable': hasReturnTrip
-          ? _timetable
-          : [], // Store timetable only if return trip is selected
+      'hasReturnTrip': hasReturnTrip,
+      'timetable': hasReturnTrip ? _timetable : [],
+      'seatData': {
+        'selectedModel': _seatData?['selectedModel'],
+        'rows': _seatData?['rows'],
+        'seatCount': _seatData?['seatCount'],
+        'seatLayout': flatSeatLayout, // Store the flattened seat layout
+      },
       'isOnline': false,
-      'createdAt': FieldValue.serverTimestamp(), // Add createdAt field
+      'createdAt': FieldValue.serverTimestamp(),
     }).then((_) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Bus added successfully')),
       );
-      Navigator.pop(context); // Return to the previous screen
+      Navigator.pop(context);
     }).catchError((error) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Failed to add bus: $error')));
