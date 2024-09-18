@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 class RegSeats extends StatefulWidget {
@@ -7,76 +6,69 @@ class RegSeats extends StatefulWidget {
 }
 
 class _RegSeatsState extends State<RegSeats> {
-  // State variables
   int selectedModel = 0;
   int seatCount = 0;
-  int rows = 0; // Number of rows
-  List<List<String>> seatLayout = [];
+  int rows = 0;
 
-  // Function to create seat layout based on input rows, columns, and seat count
+  // Using List<List<Map<String, dynamic>>> to represent the seat layout.
+  List<List<Map<String, dynamic>>> seatLayout = [];
+
+  // Function to create seat layout
   void createSeatLayout() {
     if (rows <= 0 || seatCount <= 0) {
-      // Don't generate layout if rows or seat count are invalid
       seatLayout.clear();
-      setState(() {}); // Refresh the UI
+      setState(() {});
       return;
     }
 
-    // Clear previous layout
     seatLayout.clear();
-
     int columns = 0;
+
     switch (selectedModel) {
-      case 1: // 1x2 model: 1 seat, 1 space, 2 seats
-        columns = 4; // 1 seat + 1 space + 2 seats
+      case 1:
+        columns = 4; // 1x2 model
         break;
-      case 2: // 2x2 model: 2 seats, 1 space, 2 seats
-        columns = 5; // 2 seats + 1 space + 2 seats
+      case 2:
+        columns = 5; // 2x2 model
         break;
-      case 3: // 2x3 model: 2 seats, 1 space, 3 seats
-        columns = 6; // 2 seats + 1 space + 3 seats
+      case 3:
+        columns = 6; // 2x3 model
         break;
     }
 
     int remainingSeats = seatCount;
 
-    // Generate seat layout
     for (int row = 0; row < rows; row++) {
-      List<String> currentRow = [];
+      List<Map<String, dynamic>> currentRow = [];
       for (int col = 0; col < columns; col++) {
         if (remainingSeats > 0) {
-          // Add seats and spaces based on the selected model
-          if ((selectedModel == 1 && col == 1) || (selectedModel == 2 && col == 2) || (selectedModel == 3 && col == 2)) {
-            currentRow.add("Empty"); // Add space based on the model
+          if ((selectedModel == 1 && col == 1) ||
+              (selectedModel == 2 && col == 2) ||
+              (selectedModel == 3 && col == 2)) {
+            currentRow
+                .add({'row': row, 'col': col, 'status': 'Empty'}); // Add space
           } else {
-            currentRow.add("Seat");
+            currentRow.add(
+                {'row': row, 'col': col, 'status': 'available'}); // Add seat
             remainingSeats--;
           }
         } else {
-          currentRow.add("Empty");
+          currentRow.add({
+            'row': row,
+            'col': col,
+            'status': 'Empty'
+          }); // No more seats, just empty
         }
       }
-
-      // Fill the last row with all seats, ignoring spaces
-      if (row == rows - 1 && remainingSeats > 0) {
-        for (int col = 0; col < columns && remainingSeats > 0; col++) {
-          if (currentRow[col] == "Empty") {
-            currentRow[col] = "Seat";
-            remainingSeats--;
-          }
-        }
-      }
-
       seatLayout.add(currentRow);
     }
 
-    setState(() {}); // Refresh the UI
+    setState(() {});
   }
 
-  // Function to build the seat layout grid view
+  // Function to build the seat layout
   Widget buildSeatLayout() {
     if (seatLayout.isEmpty || rows <= 0 || seatCount <= 0) {
-      // If rows or seat count are invalid, show an error message
       return Center(
         child: Text(
           'Please enter valid number of rows and seats.',
@@ -85,7 +77,6 @@ class _RegSeatsState extends State<RegSeats> {
       );
     }
 
-    // Adjust seat sizes based on the bus model
     double seatWidth = 40;
     double seatHeight = 40;
 
@@ -107,14 +98,16 @@ class _RegSeatsState extends State<RegSeats> {
       shrinkWrap: true,
       physics: NeverScrollableScrollPhysics(),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: seatLayout[0].length, // Set column count based on layout
+        crossAxisCount:
+            seatLayout[0].length, // Set column count based on layout
         childAspectRatio: seatWidth / seatHeight,
       ),
       itemCount: rows * seatLayout[0].length, // Total number of items
       itemBuilder: (context, index) {
         int rowIndex = index ~/ seatLayout[0].length;
         int colIndex = index % seatLayout[0].length;
-        bool isEmpty = seatLayout[rowIndex][colIndex] == "Empty";
+        bool isEmpty = seatLayout[rowIndex][colIndex]['status'] == "Empty";
+        bool isBooked = seatLayout[rowIndex][colIndex]['status'] == "booked";
 
         return Padding(
           padding: const EdgeInsets.all(4.0),
@@ -122,7 +115,9 @@ class _RegSeatsState extends State<RegSeats> {
             width: seatWidth,
             height: seatHeight,
             decoration: BoxDecoration(
-              color: isEmpty ? Colors.transparent : Colors.orange,
+              color: isEmpty
+                  ? Colors.transparent
+                  : (isBooked ? Colors.red : Colors.orange),
               border: Border.all(color: Colors.black),
             ),
           ),
@@ -146,78 +141,9 @@ class _RegSeatsState extends State<RegSeats> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      selectedModel = 1; // Select 1x2 model
-                    });
-                  },
-                  child: Container(
-                    padding: EdgeInsets.all(8.0),
-                    decoration: BoxDecoration(
-                      color: selectedModel == 1 ? Colors.blue : Colors.grey[200],
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    child: Column(
-                      children: [
-                        Image.asset(
-                          'assets/images/seat_booking_images/model_1x2.png',
-                          width: 100,
-                          height: 100,
-                        ),
-                        Text('1 x 2'),
-                      ],
-                    ),
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      selectedModel = 2; // Select 2x2 model
-                    });
-                  },
-                  child: Container(
-                    padding: EdgeInsets.all(8.0),
-                    decoration: BoxDecoration(
-                      color: selectedModel == 2 ? Colors.blue : Colors.grey[200],
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    child: Column(
-                      children: [
-                        Image.asset(
-                          'assets/images/seat_booking_images/model_2x2.png',
-                          width: 100,
-                          height: 100,
-                        ),
-                        Text('2 x 2'),
-                      ],
-                    ),
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      selectedModel = 3; // Select 2x3 model
-                    });
-                  },
-                  child: Container(
-                    padding: EdgeInsets.all(8.0),
-                    decoration: BoxDecoration(
-                      color: selectedModel == 3 ? Colors.blue : Colors.grey[200],
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    child: Column(
-                      children: [
-                        Image.asset(
-                          'assets/images/seat_booking_images/model_2x3.png',
-                          width: 100,
-                          height: 100,
-                        ),
-                        Text('2 x 3'),
-                      ],
-                    ),
-                  ),
-                ),
+                buildModelOption('1 x 2', 1),
+                buildModelOption('2 x 2', 2),
+                buildModelOption('2 x 3', 3),
               ],
             ),
             SizedBox(height: 20),
@@ -226,7 +152,7 @@ class _RegSeatsState extends State<RegSeats> {
               keyboardType: TextInputType.number,
               onChanged: (value) {
                 setState(() {
-                  seatCount = int.tryParse(value) ?? 0; // Update seat count
+                  seatCount = int.tryParse(value) ?? 0;
                 });
               },
             ),
@@ -236,25 +162,27 @@ class _RegSeatsState extends State<RegSeats> {
               keyboardType: TextInputType.number,
               onChanged: (value) {
                 setState(() {
-                  rows = int.tryParse(value) ?? 0; // Update row count
+                  rows = int.tryParse(value) ?? 0;
                 });
               },
             ),
             SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () {
-                createSeatLayout(); // Generate seat layout
-              },
+              onPressed: createSeatLayout,
               child: Text('Check Seat Layout'),
             ),
             SizedBox(height: 20),
-            // Display the seat layout
             buildSeatLayout(),
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                // Handle seat confirmation logic, e.g., save to Firebase
-                Navigator.pop(context); // Return to the previous screen
+                // Pass data back to AddBusPage when confirming the layout
+                Navigator.pop(context, {
+                  'selectedModel': selectedModel,
+                  'rows': rows,
+                  'seatCount': seatCount,
+                  'seatLayout': seatLayout,
+                });
               },
               child: Text('Confirm seats order'),
             ),
@@ -263,5 +191,32 @@ class _RegSeatsState extends State<RegSeats> {
       ),
     );
   }
-}
 
+  // Helper to build the bus model selection widget
+  GestureDetector buildModelOption(String label, int model) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          selectedModel = model;
+        });
+      },
+      child: Container(
+        padding: EdgeInsets.all(8.0),
+        decoration: BoxDecoration(
+          color: selectedModel == model ? Colors.blue : Colors.grey[200],
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        child: Column(
+          children: [
+            Image.asset(
+              'assets/images/seat_booking_images/model_$model.png',
+              width: 100,
+              height: 100,
+            ),
+            Text(label),
+          ],
+        ),
+      ),
+    );
+  }
+}
