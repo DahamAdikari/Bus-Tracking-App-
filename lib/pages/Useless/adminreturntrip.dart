@@ -8,7 +8,7 @@ class returnTrip extends StatefulWidget {
   final String? busID;
 
   returnTrip({
-    required this.busID,
+    required this.busID, //this is really the docID
   });
 
   @override
@@ -27,7 +27,7 @@ class _returnTripState extends State<returnTrip> {
   List<Map<String, String>> _timetable = []; // Timetable array for return trip
   String? userID; // User ID from Firestore
   bool _isLoading = true; // Track loading state
-
+  bool? _hasReturnTrip;
   @override
   void initState() {
     super.initState();
@@ -66,6 +66,7 @@ class _returnTripState extends State<returnTrip> {
                   'arrivalTime': item['arrivalTime'].toString(),
                 }),
           );
+          _hasReturnTrip = data['hasReturnTrip'];
         });
       }
     } catch (e) {
@@ -256,7 +257,9 @@ class _returnTripState extends State<returnTrip> {
         'busHalts': _busHalts,
         'isOnline': false,
         'timetable': _timetable, // Push timetable instead of timetableorg
+        'hasReturnTrip': _hasReturnTrip,
         'onWay': false,
+        'timetableorg': null,
       }).then((_) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Return bus added successfully')),

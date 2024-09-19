@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:test_4/addbusHalt.dart';
 import 'package:test_4/pages/SelectCurrentAdmin.dart';
+import 'package:test_4/pages/Useless/SeatLayoutDriver.dart';
 import 'package:test_4/pages/Useless/adminreturntrip.dart';
 import 'package:test_4/pages/displaySeats.dart';
 
@@ -307,6 +308,8 @@ class _AdminPageState extends State<AdminPage> {
         'isOnline': false,
         'timetableorg': _timetableorg,
         'hasReturnTrip': _hasReturnTrip,
+        'onWay': false,
+        'timetable': null,
       }).then((_) {
         // Update 'isadd' to true in the registration collection
         FirebaseFirestore.instance
