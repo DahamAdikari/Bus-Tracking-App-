@@ -29,6 +29,10 @@ class _AdminPageState extends State<AdminPage> {
   bool? _hasReturnTrip; // Store return trip info
   String? userID; // User ID from Firestore
   bool _isLoading = true; // Track loading state
+  List<dynamic>? _seatLayout;  // Store seat layout
+  int? _rows;                  // Store number of rows
+  int? _seatCount;             // Store seat count
+  int? _selectedModel;         // Store selected model
 
   @override
   void initState() {
@@ -166,13 +170,22 @@ class _AdminPageState extends State<AdminPage> {
                       ElevatedButton(
                         onPressed: () async {
                           if (widget.docID != null) {
-                            // Pass the docID to DisplaySeats page
-                            await Navigator.push(
+                            // Navigate to DisplaySeats and await result
+                            final result = await Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => DisplaySeats(docID: widget.docID!), // Ensure docID is passed
+                                builder: (context) => DisplaySeats(docID: widget.docID!), // Pass docID to DisplaySeats
                               ),
                             );
+
+                            if (result != null) {
+                              setState(() {
+                                _seatLayout = result['seatLayout']; // Get seat layout
+                                _rows = result['rows'];             // Get number of rows
+                                _seatCount = result['seatCount'];   // Get seat count
+                                _selectedModel = result['selectedModel']; // Get selected model
+                              });
+                            }
                           } else {
                             // Show an error message if the docID is null
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -287,7 +300,7 @@ class _AdminPageState extends State<AdminPage> {
     );
   }
 
-  // Submit form data to Firebase
+  // Submit form data to Firestore
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
@@ -310,6 +323,14 @@ class _AdminPageState extends State<AdminPage> {
         'hasReturnTrip': _hasReturnTrip,
         'onWay': false,
         'timetable': null,
+
+        // Add seatData to Firestore
+        'seatData': {
+          'seatLayout': _seatLayout,
+          'rows': _rows,
+          'seatCount': _seatCount,
+          'selectedModel': _selectedModel,
+        },
       }).then((_) {
         // Update 'isadd' to true in the registration collection
         FirebaseFirestore.instance
@@ -330,6 +351,10 @@ class _AdminPageState extends State<AdminPage> {
           destinationLocation = null;
           _selectedLocation = null;
           _busHalts.clear();
+          _seatLayout = null;
+          _rows = null;
+          _seatCount = null;
+          _selectedModel = null;
         });
       }).catchError((error) {
         ScaffoldMessenger.of(context).showSnackBar(

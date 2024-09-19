@@ -1,5 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class DisplaySeats extends StatefulWidget {
   final String docID; // Document ID passed from AdminPage
@@ -116,6 +116,16 @@ class _DisplaySeatsState extends State<DisplaySeats> {
     }
   }
 
+  // Function to confirm seat selection and pass data back
+  void _confirmSeats() {
+    Navigator.pop(context, {
+      'seatLayout': seatData!['seatLayout'],
+      'rows': seatData!['rows'],
+      'seatCount': seatData!['seatCount'],
+      'selectedModel': seatData!['selectedModel'],
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -128,6 +138,7 @@ class _DisplaySeatsState extends State<DisplaySeats> {
               children: [
                 Expanded(child: _buildSeatLayout()), // Build seat layout
                 _buildAdminControls(), // Add seat control buttons
+                _buildConfirmButton(), // Add confirm button
               ],
             ),
     );
@@ -204,6 +215,17 @@ class _DisplaySeatsState extends State<DisplaySeats> {
             child: Text('Delete Seats'),
           ),
         ],
+      ),
+    );
+  }
+
+  // Function to build confirm button
+  Widget _buildConfirmButton() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: ElevatedButton(
+        onPressed: _confirmSeats, // Navigate back and pass seat data
+        child: Text('Confirm Seats'),
       ),
     );
   }
