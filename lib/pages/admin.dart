@@ -5,6 +5,7 @@ import 'package:test_4/addbusHalt.dart';
 import 'package:test_4/pages/SelectCurrentAdmin.dart';
 import 'package:test_4/pages/Useless/SeatLayoutDriver.dart';
 import 'package:test_4/pages/Useless/adminreturntrip.dart';
+import 'package:test_4/pages/displaySeats.dart';
 
 class AdminPage extends StatefulWidget {
   final String? docID; // Receive the document ID from RegistrationListPage
@@ -161,16 +162,23 @@ class _AdminPageState extends State<AdminPage> {
                         child: Text('Add Bus Halt'),
                       ),
 
-                      // Add Seats Button
+                      // Add Seats button
                       ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  SeatLayoutPage(docID: widget.docID),
-                            ),
-                          );
+                        onPressed: () async {
+                          if (widget.docID != null) {
+                            // Pass the docID to DisplaySeats page
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => DisplaySeats(docID: widget.docID!), // Ensure docID is passed
+                              ),
+                            );
+                          } else {
+                            // Show an error message if the docID is null
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Document ID is not available. Cannot proceed to add seats.')),
+                            );
+                          }
                         },
                         child: Text('Add Seats'),
                       ),
