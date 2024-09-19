@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:test_4/pages/passenger/busmap_passenger.dart';
+import 'package:test_4/pages/passenger/seat_booking.dart';
 
 class BusDetailsPagePassenger extends StatefulWidget {
   final String busId;
@@ -108,17 +109,34 @@ class _BusDetailsPagePassengerState extends State<BusDetailsPagePassenger> {
                   ),
                 ),
                 SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => BusFullMapPage(
-                            busId: widget.busId, driverId: widget.driverId),
-                      ),
-                    );
-                  },
-                  child: Text('View Full Map'),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => BusFullMapPage(
+                                busId: widget.busId, driverId: widget.driverId),
+                          ),
+                        );
+                      },
+                      child: Text('View Full Map'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => SeatBooking(
+                                busId: widget.busId, driverId: widget.driverId),
+                          ),
+                        );
+                      },
+                      child: Text('Book My Seat'),
+                    ),
+                  ],
                 ),
               ],
             ),
