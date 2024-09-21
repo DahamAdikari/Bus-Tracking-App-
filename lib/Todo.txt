@@ -13,7 +13,7 @@ Rashmi
 2. save the seat details in firebase - done
 3. modify admin page to load and display seat data and enable deleting and adding seats - done
 4. submit seat data to the drivercollection - Done
-5. fetch seat data to busdetails_passenger.dart
+5. fetch seat data to busdetails_passenger.dart - Done
 6. develop seat booking from pasenger and blocking part from driver
 
 Dishmi
