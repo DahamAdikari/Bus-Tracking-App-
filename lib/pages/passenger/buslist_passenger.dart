@@ -87,6 +87,14 @@ class _BusListPagePassengerState extends State<BusListPagePassenger> {
                   ],
                 ),
                 child: ListTile(
+                  leading: Image.asset(
+                    isOnline
+                        ? 'assets/images/passengerTiles/GreenBus.png'
+                        : 'assets/images/passengerTiles/BlackBus.png',
+                    alignment: Alignment.center,
+                    width: 50,
+                    height: 50,
+                  ),
                   title: Text(
                     '${busData['bus']['sourceLocation']} -> ${busData['bus']['destinationLocation']}',
                     style: TextStyle(fontWeight: FontWeight.bold),
@@ -113,8 +121,6 @@ class _BusListPagePassengerState extends State<BusListPagePassenger> {
                                   letterSpacing: 1.2,
                                 ),
                               ),
-                              // Add gap between the stacked text
-
                               // Main text with no border (foreground text)
                               Text(
                                 'On the way to source',
