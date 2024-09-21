@@ -21,7 +21,7 @@ class _SearchBusPageState extends State<SearchBusPage> {
 
   // Fetch source and destination locations from Firestore
   Future<void> fetchLocations(String searchText, bool isSource) async {
-    List<String> suggestions = [];
+    Set<String> suggestions = {};
 
     // Query Firestore
     final querySnapshot =
@@ -49,9 +49,9 @@ class _SearchBusPageState extends State<SearchBusPage> {
     // Update state with fetched suggestions
     setState(() {
       if (isSource) {
-        sourceSuggestions = suggestions;
+        sourceSuggestions = suggestions.toList();
       } else {
-        destinationSuggestions = suggestions;
+        destinationSuggestions = suggestions.toList();
       }
     });
   }
