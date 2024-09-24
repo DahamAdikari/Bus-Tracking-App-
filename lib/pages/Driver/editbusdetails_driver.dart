@@ -5,8 +5,9 @@ import 'package:test_4/pages/Driver/Addbushalt_driver.dart';
 
 class EditBusDetails extends StatefulWidget {
   final String busId;
+  final String userID;
 
-  EditBusDetails({required this.busId});
+  EditBusDetails({required this.busId, required this.userID});
 
   @override
   _EditBusDetailsState createState() => _EditBusDetailsState();
@@ -26,7 +27,9 @@ class _EditBusDetailsState extends State<EditBusDetails> {
   void initState() {
     super.initState();
     _busStream = FirebaseFirestore.instance
-        .collection('buses')
+        .collection('driver')
+        .doc(widget.userID)
+        .collection("buses")
         .doc(widget.busId)
         .snapshots();
     _busStreamSubscription = _busStream.listen((snapshot) {
@@ -58,7 +61,9 @@ class _EditBusDetailsState extends State<EditBusDetails> {
 
   Future<void> _saveChanges() async {
     await FirebaseFirestore.instance
-        .collection('buses')
+        .collection('driver')
+        .doc(widget.userID)
+        .collection("buses")
         .doc(widget.busId)
         .update({
       'busName': _busNameController.text,
@@ -86,7 +91,9 @@ class _EditBusDetailsState extends State<EditBusDetails> {
       busHalts.removeAt(haltIndex);
 
       await FirebaseFirestore.instance
-          .collection('buses')
+          .collection('driver')
+          .doc(widget.userID)
+          .collection("buses")
           .doc(widget.busId)
           .update({
         'busHalts': busHalts,
@@ -108,7 +115,9 @@ class _EditBusDetailsState extends State<EditBusDetails> {
 
     if (result != null) {
       DocumentSnapshot doc = await FirebaseFirestore.instance
-          .collection('buses')
+          .collection('driver')
+          .doc(widget.userID)
+          .collection("buses")
           .doc(widget.busId)
           .get();
 
@@ -116,7 +125,9 @@ class _EditBusDetailsState extends State<EditBusDetails> {
       busHalts.add(result);
 
       await FirebaseFirestore.instance
-          .collection('buses')
+          .collection('driver')
+          .doc(widget.userID)
+          .collection("buses")
           .doc(widget.busId)
           .update({
         'busHalts': busHalts,

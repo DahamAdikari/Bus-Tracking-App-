@@ -8,6 +8,7 @@ import 'package:test_4/auth/sign_in.dart';
 import 'package:test_4/auth/home_page.dart';
 import 'package:test_4/pages/Driver/buslist_driver.dart';
 import 'package:test_4/pages/admin.dart';
+import 'package:test_4/pages/adminbuslist.dart';
 import 'package:test_4/pages/passenger/searchpage_passenger.dart';
 
 //import '../LogIn_SignIn_Common/login_common.dart';
@@ -16,14 +17,22 @@ import 'constants/image_strings.dart';
 import 'constants/sizes.dart';
 import 'forgot_password/forgot_password_option/forgot_password_model_sheet.dart';
 
-class LogInScreen extends StatelessWidget {
+
+class LogInScreen extends StatefulWidget {
   LogInScreen({super.key});
+
+
+  @override
+  _LogInScreenState createState() => _LogInScreenState();}
+
+class _LogInScreenState extends State<LogInScreen> {
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  bool _isPasswordVisible = false; // Track password visibility
 
   Future<void> _loginUser(BuildContext context) async {
     final String email = _emailController.text.trim();
@@ -46,7 +55,7 @@ class LogInScreen extends StatelessWidget {
         } else if (role == 'Passenger') {
           Get.to(() => SearchBusPage());
         } else if (role == 'admin') {
-          Get.to(() => AdminPage());
+          Get.to(() => RegistrationListPage());
         } else {
           Get.snackbar('Error', 'Unknown role');
         }
@@ -57,17 +66,20 @@ class LogInScreen extends StatelessWidget {
   }
 
   Future<String> _getUserRole(String uid) async {
-    DocumentSnapshot driverSnapshot = await _firestore.collection('driver').doc(uid).get();
+    DocumentSnapshot driverSnapshot =
+        await _firestore.collection('driver').doc(uid).get();
     if (driverSnapshot.exists) {
       return 'Driver';
     }
 
-    DocumentSnapshot passengerSnapshot = await _firestore.collection('passenger').doc(uid).get();
+    DocumentSnapshot passengerSnapshot =
+        await _firestore.collection('passenger').doc(uid).get();
     if (passengerSnapshot.exists) {
       return 'Passenger';
     }
 
-    DocumentSnapshot adminSnapshot = await _firestore.collection('admin').doc(uid).get();
+    DocumentSnapshot adminSnapshot =
+        await _firestore.collection('admin').doc(uid).get();
     if (adminSnapshot.exists) {
       return 'admin';
     }
@@ -89,9 +101,14 @@ class LogInScreen extends StatelessWidget {
                 Column(
                   children: [
 
-                    Image(image: AssetImage(AppLogoImage), height: size.height * 0.2),
-                    Text(" Welcome Back", style: TextStyle(color: tPrimaryColor, fontSize: 30, fontWeight: FontWeight.w900)),
-
+                    Image(
+                        image: AssetImage(AppLogoImage),
+                        height: size.height * 0.2),
+                    Text(" Welcome Back",
+                        style: TextStyle(
+                            color: tPrimaryColor,
+                            fontSize: 30,
+                            fontWeight: FontWeight.w900)),
                   ],
                 ),
                 SizedBox(height: 30),
@@ -112,17 +129,40 @@ class LogInScreen extends StatelessWidget {
                           keyboardType: TextInputType.emailAddress,
                         ),
                         SizedBox(height: 30.0),
+                        // TextFormField(
+                        //   controller: _passwordController,
+                        //   obscureText: true,
+                        //   decoration: InputDecoration(
+                        //     prefixIcon: Icon(Icons.fingerprint_rounded),
+                        //     labelText: "Password",
+                        //     hintText: "Enter Your Password",
+                        //     border: OutlineInputBorder(),
+                        //     suffixIcon: IconButton(
+                        //       onPressed: () {},
+                        //       icon: Icon(Icons.remove_red_eye_sharp),
+                        //     ),
+                        //   ),
+                        // ),
+
                         TextFormField(
                           controller: _passwordController,
-                          obscureText: true,
+                          obscureText: !_isPasswordVisible, // Control visibility here
                           decoration: InputDecoration(
                             prefixIcon: Icon(Icons.fingerprint_rounded),
                             labelText: "Password",
                             hintText: "Enter Your Password",
                             border: OutlineInputBorder(),
                             suffixIcon: IconButton(
-                              onPressed: () {},
-                              icon: Icon(Icons.remove_red_eye_sharp),
+                              onPressed: () {
+                                setState(() {
+                                  _isPasswordVisible = !_isPasswordVisible;
+                                });
+                              },
+                              icon: Icon(
+                                _isPasswordVisible
+                                    ? Icons.visibility
+                                    : Icons.visibility_off, // Change icon
+                              ),
                             ),
                           ),
                         ),
@@ -131,7 +171,8 @@ class LogInScreen extends StatelessWidget {
                           alignment: Alignment.centerRight,
                           child: TextButton(
                             onPressed: () {
-                              ForgetPasswordScreen.BuildShowModalBottomSheet(context);
+                              ForgetPasswordScreen.BuildShowModalBottomSheet(
+                                  context);
                             },
                             child: Text("Forget Password?"),
                           ),
@@ -148,7 +189,8 @@ class LogInScreen extends StatelessWidget {
                               backgroundColor: Colors.black87,
                               foregroundColor: Colors.white,
                               side: BorderSide(color: Colors.black87, width: 2),
-                              padding: EdgeInsets.symmetric(vertical: 8, horizontal: 50),
+                              padding: EdgeInsets.symmetric(
+                                  vertical: 8, horizontal: 50),
                             ),
                             child: Text("LOGIN"),
                           ),
@@ -156,7 +198,9 @@ class LogInScreen extends StatelessWidget {
                         SizedBox(height: 20),
                         Align(
                           alignment: Alignment.centerLeft,
-                          child: Text("Don't have an Account?", style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+                          child: Text("Don't have an Account?",
+                              style: TextStyle(
+                                  fontSize: 13, fontWeight: FontWeight.w500)),
                         ),
                         SizedBox(height: 3),
                         SizedBox(
@@ -166,13 +210,20 @@ class LogInScreen extends StatelessWidget {
                               Get.to(() => const WelcomeScreen());
                             },
                             style: OutlinedButton.styleFrom(
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(0)),
                               backgroundColor: tPrimaryColor,
                               foregroundColor: Colors.black54,
-                              side: BorderSide(color: Colors.black87, width: 0.7),
-                              padding: EdgeInsets.symmetric(vertical: 10, horizontal: 50),
+                              side:
+                                  BorderSide(color: Colors.black87, width: 0.7),
+                              padding: EdgeInsets.symmetric(
+                                  vertical: 10, horizontal: 50),
                             ),
-                            label: Text("Create a New Account", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
+                            label: Text("Create a New Account",
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600)),
                           ),
                         ),
                       ],

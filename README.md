@@ -1,6 +1,6 @@
 # test_4
 
-A new Flutter project.
+Bus Hub - The bus tracking and seat booking system
 
 ## Getting Started
 
