@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:test_4/auth/constants/colors.dart';
 import 'package:test_4/pages/passenger/buslist_passenger.dart';
 
 class SearchBusPage extends StatefulWidget {
@@ -62,9 +63,10 @@ class _SearchBusPageState extends State<SearchBusPage> {
       appBar: AppBar(
         title: Text(
           'Search Buses',
-          style: const TextStyle(fontSize: 25.0),
+          style: const TextStyle(fontSize: 25.0,color:Colors.white),
         ),
-        backgroundColor: Colors.lightBlue,
+        backgroundColor:tPrimaryColor,
+        iconTheme: IconThemeData(color: Colors.white),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -72,24 +74,81 @@ class _SearchBusPageState extends State<SearchBusPage> {
           key: _formKey,
           child: Column(
             children: [
-              SizedBox(height: 10),
+              SizedBox(height: 20),
               Text(
-                "Search for the bus you need!",
-                style: const TextStyle(fontSize: 20),
+                "🚍 Search for the Bus you need!",
+                style: const TextStyle(
+                  fontSize: 22, // Slightly larger font size
+                  fontWeight: FontWeight.bold, // Bold text for emphasis
+                  color:tPrimaryColor, // Attractive color for better visibility
+                ),
+                textAlign: TextAlign.center, // Center the text for a balanced look
               ),
+
               Center(
                 child: Image.asset(
                   'assets/images/search_bus.png',
-                  height: 200, // Adjust the height to prevent overflow
+                  height: 250, // Adjust the height to prevent overflow
                   fit: BoxFit.cover,
                 ),
               ),
               SizedBox(height: 20),
 
               // Source Location TextFormField with autocomplete dropdown
+              // TextFormField(
+              //   controller: sourceController, // Connect controller
+              //   decoration: InputDecoration(labelText: 'Source Location'),
+              //   onChanged: (value) {
+              //     if (value.isNotEmpty) {
+              //       fetchLocations(value, true); // Fetch source locations
+              //     }
+              //   },
+              //   onSaved: (value) {
+              //     sourceLocation = value;
+              //   },
+              //   validator: (value) {
+              //     if (value == null || value.isEmpty) {
+              //       return 'Please enter a valid source location';
+              //     }
+              //     return null;
+              //   },
+              // ),
+
               TextFormField(
                 controller: sourceController, // Connect controller
-                decoration: InputDecoration(labelText: 'Source Location'),
+                decoration: InputDecoration(
+                  labelText: 'Enter Source Location',
+                  labelStyle: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey[600], // Subtle label color for better readability
+                    fontWeight: FontWeight.w500,
+                  ),
+                  hintText: 'Search for a location...', // Add hint for better UX
+                  hintStyle: TextStyle(
+                    color: Colors.grey[400], // Subtle hint color
+                  ),
+                  prefixIcon: Icon(
+                    Icons.location_on, // Location icon for better context
+                    color: Colors.blueAccent, // Accent color for the icon
+                  ),
+                  filled: true, // Filled background for better focus
+                  fillColor: Colors.grey[100], // Light background color
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12), // Rounded borders for a modern look
+                    borderSide: BorderSide.none, // Remove default border
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.grey.shade300, width: 1.5), // Subtle border when not focused
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.blueAccent, width: 2), // Bold blue border on focus
+                  ),
+                  contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 20), // Comfortable padding
+                ),
+                style: TextStyle(fontSize: 16, color: Colors.black87), // Make text more readable
+                cursorColor: Colors.blueAccent, // Color of the blinking cursor
                 onChanged: (value) {
                   if (value.isNotEmpty) {
                     fetchLocations(value, true); // Fetch source locations
@@ -105,6 +164,7 @@ class _SearchBusPageState extends State<SearchBusPage> {
                   return null;
                 },
               ),
+
               if (sourceSuggestions.isNotEmpty)
                 Container(
                   height: 100,
@@ -125,11 +185,62 @@ class _SearchBusPageState extends State<SearchBusPage> {
                     },
                   ),
                 ),
-
+              SizedBox(height: 30,),
               // Destination Location TextFormField with autocomplete dropdown
+              // TextFormField(
+              //   controller: destinationController, // Connect controller
+              //   decoration: InputDecoration(labelText: 'Destination Location'),
+              //   onChanged: (value) {
+              //     if (value.isNotEmpty) {
+              //       fetchLocations(value, false); // Fetch destination locations
+              //     }
+              //   },
+              //   onSaved: (value) {
+              //     destinationLocation = value;
+              //   },
+              //   validator: (value) {
+              //     if (value == null || value.isEmpty) {
+              //       return 'Please enter a valid destination location';
+              //     }
+              //     return null;
+              //   },
+              // ),
+
               TextFormField(
                 controller: destinationController, // Connect controller
-                decoration: InputDecoration(labelText: 'Destination Location'),
+                decoration: InputDecoration(
+                  labelText: 'Enter Destination Location',
+                  labelStyle: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey[600], // Subtle label color for better readability
+                    fontWeight: FontWeight.w500,
+                  ),
+                  hintText: 'Search for a location...', // Add hint for better UX
+                  hintStyle: TextStyle(
+                    color: Colors.grey[400], // Subtle hint color
+                  ),
+                  prefixIcon: Icon(
+                    Icons.location_on, // Location icon for better context
+                    color: Colors.redAccent, // Accent color for the icon (different from source)
+                  ),
+                  filled: true, // Filled background for better focus
+                  fillColor: Colors.grey[100], // Light background color
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12), // Rounded borders for a modern look
+                    borderSide: BorderSide.none, // Remove default border
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.grey.shade300, width: 1.5), // Subtle border when not focused
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.redAccent, width: 2), // Bold red border on focus (different from source)
+                  ),
+                  contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 20), // Comfortable padding
+                ),
+                style: TextStyle(fontSize: 16, color: Colors.black87), // Make text more readable
+                cursorColor: Colors.redAccent, // Color of the blinking cursor (matches focused border)
                 onChanged: (value) {
                   if (value.isNotEmpty) {
                     fetchLocations(value, false); // Fetch destination locations
@@ -166,8 +277,7 @@ class _SearchBusPageState extends State<SearchBusPage> {
                     },
                   ),
                 ),
-
-              SizedBox(height: 20),
+              SizedBox(height: 60),
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
@@ -186,7 +296,7 @@ class _SearchBusPageState extends State<SearchBusPage> {
                 },
                 style: ElevatedButton.styleFrom(
                   foregroundColor: Colors.white,
-                  backgroundColor: const Color(0xFF03A9F4),
+                  backgroundColor: tPrimaryColor,
                 ),
                 child: Text('View Buses'),
               ),
