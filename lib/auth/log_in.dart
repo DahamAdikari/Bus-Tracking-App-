@@ -17,14 +17,22 @@ import 'constants/image_strings.dart';
 import 'constants/sizes.dart';
 import 'forgot_password/forgot_password_option/forgot_password_model_sheet.dart';
 
-class LogInScreen extends StatelessWidget {
+
+class LogInScreen extends StatefulWidget {
   LogInScreen({super.key});
+
+
+  @override
+  _LogInScreenState createState() => _LogInScreenState();}
+
+class _LogInScreenState extends State<LogInScreen> {
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  bool _isPasswordVisible = false; // Track password visibility
 
   Future<void> _loginUser(BuildContext context) async {
     final String email = _emailController.text.trim();
@@ -121,17 +129,40 @@ class LogInScreen extends StatelessWidget {
                           keyboardType: TextInputType.emailAddress,
                         ),
                         SizedBox(height: 30.0),
+                        // TextFormField(
+                        //   controller: _passwordController,
+                        //   obscureText: true,
+                        //   decoration: InputDecoration(
+                        //     prefixIcon: Icon(Icons.fingerprint_rounded),
+                        //     labelText: "Password",
+                        //     hintText: "Enter Your Password",
+                        //     border: OutlineInputBorder(),
+                        //     suffixIcon: IconButton(
+                        //       onPressed: () {},
+                        //       icon: Icon(Icons.remove_red_eye_sharp),
+                        //     ),
+                        //   ),
+                        // ),
+
                         TextFormField(
                           controller: _passwordController,
-                          obscureText: true,
+                          obscureText: !_isPasswordVisible, // Control visibility here
                           decoration: InputDecoration(
                             prefixIcon: Icon(Icons.fingerprint_rounded),
                             labelText: "Password",
                             hintText: "Enter Your Password",
                             border: OutlineInputBorder(),
                             suffixIcon: IconButton(
-                              onPressed: () {},
-                              icon: Icon(Icons.remove_red_eye_sharp),
+                              onPressed: () {
+                                setState(() {
+                                  _isPasswordVisible = !_isPasswordVisible;
+                                });
+                              },
+                              icon: Icon(
+                                _isPasswordVisible
+                                    ? Icons.visibility
+                                    : Icons.visibility_off, // Change icon
+                              ),
                             ),
                           ),
                         ),
