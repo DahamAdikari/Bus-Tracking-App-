@@ -28,6 +28,11 @@ class _returnTripState extends State<returnTrip> {
   String? userID; // User ID from Firestore
   bool _isLoading = true; // Track loading state
   bool? _hasReturnTrip;
+  List<dynamic>? _seatLayout;  
+  int? _rows;   
+  int? _seatCount;  
+  int? _selectedModel;  
+
   @override
   void initState() {
     super.initState();
@@ -67,6 +72,12 @@ class _returnTripState extends State<returnTrip> {
                 }),
           );
           _hasReturnTrip = data['hasReturnTrip'];
+
+          _seatLayout = data['seatData']['seatLayout'];
+          _rows = data['seatData']['rows'];
+          _seatCount = data['seatData']['seatCount'];
+          _selectedModel = data['seatData']['selectedModel'];
+
         });
       }
     } catch (e) {
@@ -260,6 +271,13 @@ class _returnTripState extends State<returnTrip> {
         'hasReturnTrip': _hasReturnTrip,
         'onWay': false,
         'timetableorg': null,
+
+        'seatData': {
+          'seatLayout': _seatLayout,
+          'rows': _rows,
+          'seatCount': _seatCount,
+          'selectedModel': _selectedModel,
+        },
       }).then((_) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Return bus added successfully')),
