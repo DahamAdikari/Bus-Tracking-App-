@@ -1,12 +1,20 @@
 Daham
-1. Fetch the Registration form from the Registration collection to the Admin.
-2. Make a list of bus that are wanted to Register as the first page of Admin.
+1. Fetch the Registration form from the Registration collection to the Admin. - Done
+2. Make a list of bus that are wanted to Register as the first page of Admin. - Done
+3. Let passenger to select the locations with a dropbox - Done
+4. In Driver's selected bus detail page, don't go online if location permission is not given
 
 Sahan
-1.
+1. Settle the entering phase
+2. If someone logged in, stay him/her logged in until he/she log out
 
 Rashmi
-1. create seat models in the firebase
+1. create seat models according to the user input in registration form - Done
+2. save the seat details in firebase - done
+3. modify admin page to load and display seat data and enable deleting and adding seats - done
+4. submit seat data to the drivercollection - Done
+5. fetch seat data to busdetails_passenger.dart - Done
+6. develop seat booking from pasenger and blocking part from driver
 
 Dishmi
 1.

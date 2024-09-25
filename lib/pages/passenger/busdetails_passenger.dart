@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:test_4/pages/passenger/busmap_passenger.dart';
+import 'package:test_4/pages/passenger/seat_booking.dart';
 
 class BusDetailsPagePassenger extends StatefulWidget {
   final String busId;
+  final String driverId;
 
-  BusDetailsPagePassenger({required this.busId});
+  BusDetailsPagePassenger({required this.busId, required this.driverId});
 
   @override
   _BusDetailsPagePassengerState createState() =>
@@ -14,16 +16,17 @@ class BusDetailsPagePassenger extends StatefulWidget {
 }
 
 class _BusDetailsPagePassengerState extends State<BusDetailsPagePassenger> {
-  GoogleMapController? _mapController;
+  late Stream<DocumentSnapshot> _busStream;
 
-  void _onMapCreated(GoogleMapController controller) {
-    _mapController = controller;
-  }
-
-  void _moveCamera(LatLng position) {
-    _mapController?.animateCamera(
-      CameraUpdate.newLatLng(position),
-    );
+  @override
+  void initState() {
+    super.initState();
+    _busStream = FirebaseFirestore.instance
+        .collection('driver')
+        .doc(widget.driverId)
+        .collection('buses')
+        .doc(widget.busId)
+        .snapshots();
   }
 
   @override
@@ -33,27 +36,22 @@ class _BusDetailsPagePassengerState extends State<BusDetailsPagePassenger> {
         title: Text('Bus Details'),
       ),
       body: StreamBuilder<DocumentSnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('buses')
-            .doc(widget.busId)
-            .snapshots(),
+        stream: _busStream,
         builder: (context, snapshot) {
-          if (!snapshot.hasData) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
           }
 
+          if (!snapshot.hasData || !snapshot.data!.exists) {
+            return Center(child: Text('Bus details not found.'));
+          }
+
           var busData = snapshot.data!;
-          LatLng busPosition = LatLng(
-            busData['latitude'] ?? 0.0,
-            busData['longitude'] ?? 0.0,
-          );
+          double latitude = busData['latitude']?.toDouble() ?? 0.0;
+          double longitude = busData['longitude']?.toDouble() ?? 0.0;
+          LatLng busPosition = LatLng(latitude, longitude);
 
-          // Move the camera to the bus's current position
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            _moveCamera(busPosition);
-          });
-
-          return Padding(
+          return SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -70,10 +68,25 @@ class _BusDetailsPagePassengerState extends State<BusDetailsPagePassenger> {
                 Text('Destination Location: ${busData['destinationLocation']}',
                     style: TextStyle(fontSize: 18)),
                 SizedBox(height: 20),
+                Text('Bus Halts:', style: TextStyle(fontSize: 18)),
+                SizedBox(height: 10),
+                busData['busHalts']?.isEmpty ?? true
+                    ? Text('No bus halts', style: TextStyle(fontSize: 18))
+                    : Container(
+                        height: 200,
+                        child: ListView.builder(
+                          itemCount: busData['busHalts']?.length ?? 0,
+                          itemBuilder: (context, index) {
+                            return ListTile(
+                              title: Text(busData['busHalts'][index]['name']),
+                            );
+                          },
+                        ),
+                      ),
+                SizedBox(height: 20),
                 Container(
-                  height: 300,
+                  height: 300, // Set a fixed height for the map
                   child: GoogleMap(
-                    onMapCreated: _onMapCreated,
                     initialCameraPosition: CameraPosition(
                       target: busPosition,
                       zoom: 14,
@@ -84,20 +97,46 @@ class _BusDetailsPagePassengerState extends State<BusDetailsPagePassenger> {
                         position: busPosition,
                       ),
                     },
+                    onMapCreated: (controller) {
+                      // Add map created logic here if needed
+                    },
+                    // Update the camera position whenever the location changes
+                    myLocationEnabled: true,
+                    myLocationButtonEnabled: true,
+                    onCameraMove: (position) {
+                      // Handle camera move if necessary
+                    },
                   ),
                 ),
                 SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            BusFullMapPage(busId: widget.busId),
-                      ),
-                    );
-                  },
-                  child: Text('View Full Map'),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => BusFullMapPage(
+                                busId: widget.busId, driverId: widget.driverId),
+                          ),
+                        );
+                      },
+                      child: Text('View Full Map'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => SeatBooking(
+                                busId: widget.busId, driverId: widget.driverId),
+                          ),
+                        );
+                      },
+                      child: Text('Book My Seat'),
+                    ),
+                  ],
                 ),
               ],
             ),

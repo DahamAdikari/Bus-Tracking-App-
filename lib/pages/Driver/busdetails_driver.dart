@@ -7,8 +7,9 @@ import 'package:test_4/pages/Driver/editbusdetails_driver.dart';
 
 class BusDetailsPage extends StatefulWidget {
   final String busId;
+  final String userID;
 
-  BusDetailsPage({required this.busId});
+  BusDetailsPage({required this.busId, required this.userID});
 
   @override
   _BusDetailsPageState createState() => _BusDetailsPageState();
@@ -16,37 +17,67 @@ class BusDetailsPage extends StatefulWidget {
 
 class _BusDetailsPageState extends State<BusDetailsPage> {
   Location _locationController = Location();
-  StreamSubscription<LocationData>? _locationSubscription;
+  StreamSubscription<LocationData>? _locationSubscription; // For selected bus
+  StreamSubscription<LocationData>?
+      _returnTripLocationSubscription; // For return trip
   DocumentSnapshot? busData;
   bool isOnline = false;
+  bool hasReturnTrip = false;
+  bool isReturnTripActive = false; // For the toggle button state
+  String destinationLocation = '';
+  String sourceLocation = '';
+  List<Map<String, String>> _timetable = []; // Timetable array for return trip
 
   @override
   void initState() {
     super.initState();
-    _loadBusData(); // Initial data load
+    _loadBusData(); // Load bus data initially
   }
 
   Future<void> _loadBusData() async {
     try {
+      // Fetch the specific bus data from Firestore
       DocumentSnapshot data = await FirebaseFirestore.instance
+          .collection('driver')
+          .doc(widget.userID)
           .collection('buses')
           .doc(widget.busId)
           .get();
+
       setState(() {
         busData = data;
-        isOnline = busData!['isOnline'] ?? false; // Initialize the online state
+        isOnline = busData!['isOnline'] ?? false;
+        hasReturnTrip = busData!['hasReturnTrip'] ?? false;
+        destinationLocation = busData!['destinationLocation'] ?? '';
+        sourceLocation = busData!['sourceLocation'] ?? '';
+        // Fetch timetable for return trip (replace timetableorg with timetable)
+        _timetable = (data['timetable'] != null)
+            ? List<Map<String, String>>.from(
+                (data['timetable'] as List).map((item) => {
+                      'departureTime': item['departureTime'].toString(),
+                      'arrivalTime': item['arrivalTime'].toString(),
+                    }),
+              )
+            : (data['timetableorg'] != null)
+                ? List<Map<String, String>>.from(
+                    (data['timetableorg'] as List).map((item) => {
+                          'departureTime': item['departureTime'].toString(),
+                          'arrivalTime': item['arrivalTime'].toString(),
+                        }),
+                  )
+                : [];
       });
     } catch (e) {
-      // Handle any errors
       print("Error fetching bus data: $e");
     }
   }
 
   void _toggleOnlineStatus() async {
     if (isOnline) {
-      // Go offline
-      _locationSubscription?.cancel();
+      _stopSelectedBusLocationUpdates();
       await FirebaseFirestore.instance
+          .collection('driver')
+          .doc(widget.userID)
           .collection('buses')
           .doc(widget.busId)
           .update({'isOnline': false});
@@ -54,19 +85,28 @@ class _BusDetailsPageState extends State<BusDetailsPage> {
         isOnline = false;
       });
     } else {
-      // Go online
-      await _startLocationUpdates();
-      await FirebaseFirestore.instance
-          .collection('buses')
-          .doc(widget.busId)
-          .update({'isOnline': true});
-      setState(() {
-        isOnline = true;
-      });
+      bool canGoOnline = await _startSelectedBusLocationUpdates();
+      if (canGoOnline) {
+        await FirebaseFirestore.instance
+            .collection('driver')
+            .doc(widget.userID)
+            .collection('buses')
+            .doc(widget.busId)
+            .update({'isOnline': true});
+        setState(() {
+          isOnline = true;
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Location permission is required to go online.'),
+          ),
+        );
+      }
     }
   }
 
-  Future<void> _startLocationUpdates() async {
+  Future<bool> _startSelectedBusLocationUpdates() async {
     bool _serviceEnabled;
     PermissionStatus _permissionGranted;
 
@@ -75,7 +115,7 @@ class _BusDetailsPageState extends State<BusDetailsPage> {
     if (!_serviceEnabled) {
       _serviceEnabled = await _locationController.requestService();
       if (!_serviceEnabled) {
-        return;
+        return false;
       }
     }
 
@@ -83,16 +123,17 @@ class _BusDetailsPageState extends State<BusDetailsPage> {
     if (_permissionGranted == PermissionStatus.denied) {
       _permissionGranted = await _locationController.requestPermission();
       if (_permissionGranted != PermissionStatus.granted) {
-        return;
+        return false;
       }
     }
 
-    // Listen to location changes and update the database
     _locationSubscription = _locationController.onLocationChanged
         .listen((LocationData currentLocation) {
       if (currentLocation.latitude != null &&
           currentLocation.longitude != null) {
         FirebaseFirestore.instance
+            .collection('driver')
+            .doc(widget.userID)
             .collection('buses')
             .doc(widget.busId)
             .update({
@@ -101,6 +142,53 @@ class _BusDetailsPageState extends State<BusDetailsPage> {
         });
       }
     });
+
+    return true;
+  }
+
+  Future<void> _startReturnTripLocationUpdates() async {
+    _returnTripLocationSubscription = _locationController.onLocationChanged
+        .listen((LocationData currentLocation) {
+      if (currentLocation.latitude != null &&
+          currentLocation.longitude != null) {
+        _updateReturnTripBusLocation(
+            currentLocation.latitude!, currentLocation.longitude!);
+      }
+    });
+  }
+
+  void _stopSelectedBusLocationUpdates() {
+    _locationSubscription?.cancel();
+  }
+
+  void _stopReturnTripLocationUpdates() {
+    _returnTripLocationSubscription?.cancel();
+  }
+
+  Future<void> _updateReturnTripBusLocation(
+      double latitude, double longitude) async {
+    try {
+      // Search for the bus with the same busID, but a different document ID
+      QuerySnapshot buses = await FirebaseFirestore.instance
+          .collection('driver')
+          .doc(widget.userID)
+          .collection('buses')
+          .where('busID', isEqualTo: busData!['busID'])
+          .where(FieldPath.documentId, isNotEqualTo: widget.busId)
+          .get();
+
+      if (buses.docs.isNotEmpty) {
+        // Update latitude and longitude of the found bus
+        buses.docs.forEach((doc) {
+          doc.reference.update({
+            'latitude': latitude,
+            'longitude': longitude,
+          });
+        });
+      }
+    } catch (e) {
+      print("Error updating return trip bus location: $e");
+    }
   }
 
   Future<bool> _onWillPop() async {
@@ -117,7 +205,22 @@ class _BusDetailsPageState extends State<BusDetailsPage> {
                   child: Text('No'),
                 ),
                 TextButton(
-                  onPressed: () => Navigator.of(context).pop(true),
+                  onPressed: () async {
+                    // Change online status to false and update Firestore
+                    await FirebaseFirestore.instance
+                        .collection('driver')
+                        .doc(widget.userID)
+                        .collection('buses')
+                        .doc(widget.busId)
+                        .update({'isOnline': false});
+
+                    setState(() {
+                      isOnline = false;
+                    });
+
+                    // Close the dialog and allow back navigation
+                    Navigator.of(context).pop(true);
+                  },
                   child: Text('Yes'),
                 ),
               ],
@@ -132,7 +235,33 @@ class _BusDetailsPageState extends State<BusDetailsPage> {
   @override
   void dispose() {
     _locationSubscription?.cancel();
+    _returnTripLocationSubscription?.cancel();
     super.dispose();
+  }
+
+  Future<void> _updateReturnTripStatus(bool status) async {
+    try {
+      // Find the return trip bus document (different document with the same busID)
+      QuerySnapshot buses = await FirebaseFirestore.instance
+          .collection('driver')
+          .doc(widget.userID)
+          .collection('buses')
+          .where('busID', isEqualTo: busData!['busID'])
+          .where(FieldPath.documentId, isNotEqualTo: widget.busId)
+          .get();
+
+      if (buses.docs.isNotEmpty) {
+        // Update 'onWay' and 'isOnline' for the return trip bus document
+        buses.docs.forEach((doc) {
+          doc.reference.update({
+            'onWay': status,
+            'isOnline': status,
+          });
+        });
+      }
+    } catch (e) {
+      print("Error updating return trip status: $e");
+    }
   }
 
   @override
@@ -155,11 +284,11 @@ class _BusDetailsPageState extends State<BusDetailsPage> {
                   final result = await Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => EditBusDetails(busId: widget.busId),
+                      builder: (context) => EditBusDetails(
+                          busId: widget.busId, userID: widget.userID),
                     ),
                   );
                   if (result == true) {
-                    // Refresh data after returning from edit page
                     _loadBusData();
                   }
                 },
@@ -185,11 +314,10 @@ class _BusDetailsPageState extends State<BusDetailsPage> {
                     Text('Route Number: ${busData!['routeNum']}',
                         style: TextStyle(fontSize: 18)),
                     SizedBox(height: 10),
-                    Text('Source Location: ${busData!['sourceLocation']}',
+                    Text('Source Location: $sourceLocation',
                         style: TextStyle(fontSize: 18)),
                     SizedBox(height: 10),
-                    Text(
-                        'Destination Location: ${busData!['destinationLocation']}',
+                    Text('Destination Location: $destinationLocation',
                         style: TextStyle(fontSize: 18)),
                     SizedBox(height: 20),
                     Text('Bus Halts:', style: TextStyle(fontSize: 18)),
@@ -206,37 +334,113 @@ class _BusDetailsPageState extends State<BusDetailsPage> {
                       ),
                     ),
                     SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        ElevatedButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => BusLocationMapPage(
-                                  busId: widget.busId,
-                                ),
+
+                    // Display the timetable for return trip
+                    _timetable.isNotEmpty
+                        ? Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Timetable:',
+                                style: TextStyle(fontWeight: FontWeight.bold),
                               ),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            foregroundColor: Colors.white,
-                            backgroundColor: Colors.lightBlue,
-                          ),
-                          child: Text('View on Google Maps'),
+                              ..._timetable.map((entry) {
+                                return Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                        'Departure: ${entry['departureTime'] ?? ''}'),
+                                    Text(
+                                        'Arrival: ${entry['arrivalTime'] ?? ''}'),
+                                  ],
+                                );
+                              }).toList(),
+                            ],
+                          )
+                        : Text('No timetable available'),
+
+                    SizedBox(height: 10),
+                    if (isOnline)
+                      Container(
+                        padding: EdgeInsets.all(10.0),
+                        decoration: BoxDecoration(
+                          color: Colors.green[100],
+                          borderRadius: BorderRadius.circular(5),
                         ),
-                        ElevatedButton(
-                          onPressed: _toggleOnlineStatus,
-                          style: ElevatedButton.styleFrom(
-                            foregroundColor: Colors.white,
-                            backgroundColor:
-                                isOnline ? Colors.red : Colors.green,
+                        child: Text(
+                          'You are Online, Your bus is tracking to passengers',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.green[800],
+                            fontWeight: FontWeight.bold,
                           ),
-                          child: Text(isOnline ? 'Go Offline' : 'Go Online'),
                         ),
-                      ],
+                      ),
+
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => BusLocationMapPage(
+                              busId: widget.busId,
+                              userID: widget.userID,
+                            ),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        backgroundColor: Colors.lightBlue,
+                      ),
+                      child: Text('View on Google Maps'),
                     ),
+
+                    // "Go online" toggle button
+                    ElevatedButton(
+                      onPressed: _toggleOnlineStatus,
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        backgroundColor: isOnline ? Colors.red : Colors.green,
+                      ),
+                      child: Text(isOnline ? 'Go Offline' : 'Go Online'),
+                    ),
+                    SizedBox(height: 10),
+
+                    // Return Trip toggle
+                    if (hasReturnTrip)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Return Trip',
+                            style: TextStyle(fontSize: 18),
+                          ),
+                          Switch(
+                            value: isReturnTripActive,
+                            onChanged: (value) async {
+                              setState(() {
+                                isReturnTripActive = value;
+                              });
+
+                              if (isReturnTripActive) {
+                                // Start updating the location for the return trip
+                                _startReturnTripLocationUpdates();
+
+                                // Set 'onWay' and 'isOnline' to true for the return trip bus document
+                                await _updateReturnTripStatus(true);
+                              } else {
+                                // Stop updating the location for the return trip
+                                _stopReturnTripLocationUpdates();
+
+                                // Set 'onWay' and 'isOnline' to false for the return trip bus document
+                                await _updateReturnTripStatus(false);
+                              }
+                            },
+                          ),
+                        ],
+                      ),
                   ],
                 ),
               ),

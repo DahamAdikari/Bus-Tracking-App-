@@ -3,20 +3,19 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:test_4/addbusHalt.dart';
 import 'package:test_4/pages/SelectCurrentAdmin.dart';
-import 'package:test_4/pages/Useless/SeatLayoutDriver.dart';
-import 'package:test_4/pages/Useless/adminreturntrip.dart';
-import 'package:test_4/pages/displaySeats.dart';
 
-class AdminPage extends StatefulWidget {
-  final String? docID; // Receive the document ID from RegistrationListPage
+class returnTrip extends StatefulWidget {
+  final String? busID;
 
-  AdminPage({Key? key, this.docID}) : super(key: key);
+  returnTrip({
+    required this.busID, //this is really the docID
+  });
 
   @override
-  _AdminPageState createState() => _AdminPageState();
+  _returnTripState createState() => _returnTripState();
 }
 
-class _AdminPageState extends State<AdminPage> {
+class _returnTripState extends State<returnTrip> {
   final _formKey = GlobalKey<FormState>();
   String? busID;
   String? busName;
@@ -25,27 +24,22 @@ class _AdminPageState extends State<AdminPage> {
   String? destinationLocation;
   LatLng? _selectedLocation; // Store selected location
   List<Map<String, dynamic>> _busHalts = [];
-  List<Map<String, String>> _timetableorg = []; // Timetable array
-  bool? _hasReturnTrip; // Store return trip info
+  List<Map<String, String>> _timetable = []; // Timetable array for return trip
   String? userID; // User ID from Firestore
   bool _isLoading = true; // Track loading state
-  List<dynamic>? _seatLayout;  // Store seat layout
-  int? _rows;                  // Store number of rows
-  int? _seatCount;             // Store seat count
-  int? _selectedModel;         // Store selected model
-
+  bool? _hasReturnTrip;
   @override
   void initState() {
     super.initState();
-    _fetchBusData(); // Fetch data using the passed docID
+    _fetchBusData(); // Fetch data using the busID
   }
 
   Future<void> _fetchBusData() async {
     try {
-      // Fetch the bus data using the docID from the registration collection
+      // Fetch the bus data using the busID from the registration collection
       DocumentSnapshot doc = await FirebaseFirestore.instance
           .collection('registration')
-          .doc(widget.docID)
+          .doc(widget.busID)
           .get();
 
       if (doc.exists) {
@@ -55,8 +49,9 @@ class _AdminPageState extends State<AdminPage> {
           busID = data['busID'];
           busName = data['busName'];
           routeNum = data['routeNum'];
-          sourceLocation = data['sourceLocation'];
-          destinationLocation = data['destinationLocation'];
+          // Swap source and destination locations
+          sourceLocation = data['destinationLocation'];
+          destinationLocation = data['sourceLocation'];
           userID = data['userID']; // Get the userID to submit later
           _selectedLocation =
               data['latitude'] != null && data['longitude'] != null
@@ -64,14 +59,13 @@ class _AdminPageState extends State<AdminPage> {
                   : null;
           _busHalts = List<Map<String, dynamic>>.from(data['busHalts'] ?? []);
 
-          // Handle timetable data properly with Map<String, dynamic>
-          _timetableorg = List<Map<String, String>>.from(
-            (data['timetableorg'] ?? []).map((item) => {
+          // Fetch timetable for return trip (replace timetableorg with timetable)
+          _timetable = List<Map<String, String>>.from(
+            (data['timetable'] ?? []).map((item) => {
                   'departureTime': item['departureTime'].toString(),
                   'arrivalTime': item['arrivalTime'].toString(),
                 }),
           );
-
           _hasReturnTrip = data['hasReturnTrip'];
         });
       }
@@ -88,7 +82,7 @@ class _AdminPageState extends State<AdminPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Bus Details'),
+        title: Text('Add Return Bus Details'),
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator()) // Show loading spinner
@@ -114,8 +108,8 @@ class _AdminPageState extends State<AdminPage> {
 
                       SizedBox(height: 20),
 
-                      // Directly display the fetched timetable
-                      _timetableorg.isNotEmpty
+                      // Display the timetable for return trip
+                      _timetable.isNotEmpty
                           ? Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -123,7 +117,7 @@ class _AdminPageState extends State<AdminPage> {
                                   'Timetable:',
                                   style: TextStyle(fontWeight: FontWeight.bold),
                                 ),
-                                ..._timetableorg.map((entry) {
+                                ..._timetable.map((entry) {
                                   return Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
@@ -166,36 +160,6 @@ class _AdminPageState extends State<AdminPage> {
                         child: Text('Add Bus Halt'),
                       ),
 
-                      // Add Seats button
-                      ElevatedButton(
-                        onPressed: () async {
-                          if (widget.docID != null) {
-                            // Navigate to DisplaySeats and await result
-                            final result = await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => DisplaySeats(docID: widget.docID!), // Pass docID to DisplaySeats
-                              ),
-                            );
-
-                            if (result != null) {
-                              setState(() {
-                                _seatLayout = result['seatLayout']; // Get seat layout
-                                _rows = result['rows'];             // Get number of rows
-                                _seatCount = result['seatCount'];   // Get seat count
-                                _selectedModel = result['selectedModel']; // Get selected model
-                              });
-                            }
-                          } else {
-                            // Show an error message if the docID is null
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Document ID is not available. Cannot proceed to add seats.')),
-                            );
-                          }
-                        },
-                        child: Text('Add Seats'),
-                      ),
-
                       // Add Current Location Button
                       ElevatedButton(
                         onPressed: () async {
@@ -223,10 +187,6 @@ class _AdminPageState extends State<AdminPage> {
                       // Auto-display Bus Halts
                       _buildBusHalts(),
 
-                      // Return Trip Check
-                      SizedBox(height: 20),
-                      _buildReturnTripCheck(),
-
                       // Add Bus Button
                       ElevatedButton(
                         onPressed: _submitForm,
@@ -238,29 +198,6 @@ class _AdminPageState extends State<AdminPage> {
               ),
             ),
     );
-  }
-
-  // Build Return Trip Check
-  Widget _buildReturnTripCheck() {
-    if (_hasReturnTrip == null) return Container();
-
-    if (_hasReturnTrip == false) {
-      return Text(
-        'Has a return trip: No',
-        style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-      );
-    } else {
-      return ElevatedButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => returnTrip(busID: widget.docID)),
-          );
-        },
-        child: Text('Add the return bus'),
-      );
-    }
   }
 
   // Build Bus Halts List
@@ -300,7 +237,7 @@ class _AdminPageState extends State<AdminPage> {
     );
   }
 
-  // Submit form data to Firestore
+  // Submit form data to Firebase
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
@@ -308,7 +245,7 @@ class _AdminPageState extends State<AdminPage> {
       FirebaseFirestore.instance
           .collection('driver')
           .doc(userID) // Use userID fetched from the registration document
-          .collection('buses')
+          .collection('buses') // Use a different collection for return buses
           .add({
         'busID': busID,
         'busName': busName,
@@ -319,27 +256,13 @@ class _AdminPageState extends State<AdminPage> {
         'longitude': _selectedLocation?.longitude,
         'busHalts': _busHalts,
         'isOnline': false,
-        'timetableorg': _timetableorg,
+        'timetable': _timetable, // Push timetable instead of timetableorg
         'hasReturnTrip': _hasReturnTrip,
         'onWay': false,
-        'timetable': null,
-
-        // Add seatData to Firestore
-        'seatData': {
-          'seatLayout': _seatLayout,
-          'rows': _rows,
-          'seatCount': _seatCount,
-          'selectedModel': _selectedModel,
-        },
+        'timetableorg': null,
       }).then((_) {
-        // Update 'isadd' to true in the registration collection
-        FirebaseFirestore.instance
-            .collection('registration')
-            .doc(widget.docID)
-            .update({'isadd': true});
-
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Bus added successfully')),
+          SnackBar(content: Text('Return bus added successfully')),
         );
 
         _formKey.currentState!.reset();
@@ -351,14 +274,10 @@ class _AdminPageState extends State<AdminPage> {
           destinationLocation = null;
           _selectedLocation = null;
           _busHalts.clear();
-          _seatLayout = null;
-          _rows = null;
-          _seatCount = null;
-          _selectedModel = null;
         });
       }).catchError((error) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to add bus: $error')),
+          SnackBar(content: Text('Failed to add return bus: $error')),
         );
       });
     }

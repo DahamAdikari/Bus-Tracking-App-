@@ -4,8 +4,9 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class BusFullMapPage extends StatefulWidget {
   final String busId;
+  final String driverId;
 
-  BusFullMapPage({required this.busId});
+  BusFullMapPage({required this.busId, required this.driverId});
 
   @override
   _BusFullMapPageState createState() => _BusFullMapPageState();
@@ -13,6 +14,24 @@ class BusFullMapPage extends StatefulWidget {
 
 class _BusFullMapPageState extends State<BusFullMapPage> {
   GoogleMapController? _mapController;
+
+  Stream<DocumentSnapshot>? _busStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _busStream = _getBusStream();
+  }
+
+  Stream<DocumentSnapshot> _getBusStream() {
+    // Return a stream of the bus document from the specific driver's subcollection
+    return FirebaseFirestore.instance
+        .collection('driver')
+        .doc(widget.driverId)
+        .collection('buses')
+        .doc(widget.busId)
+        .snapshots();
+  }
 
   void _onMapCreated(GoogleMapController controller) {
     _mapController = controller;
@@ -31,22 +50,21 @@ class _BusFullMapPageState extends State<BusFullMapPage> {
         title: Text('Bus Full Map View'),
       ),
       body: StreamBuilder<DocumentSnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('buses')
-            .doc(widget.busId)
-            .snapshots(),
+        stream: _busStream,
         builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
           if (!snapshot.hasData) {
             return Center(child: CircularProgressIndicator());
           }
 
           var busData = snapshot.data!;
-          double latitude = busData['latitude'] ?? 0.0;
-          double longitude = busData['longitude'] ?? 0.0;
+          double latitude = busData['latitude']?.toDouble() ?? 0.0;
+          double longitude = busData['longitude']?.toDouble() ?? 0.0;
 
           LatLng busLocation = LatLng(latitude, longitude);
 
-          // Move the camera to the bus's current position
           WidgetsBinding.instance.addPostFrameCallback((_) {
             _moveCamera(busLocation);
           });

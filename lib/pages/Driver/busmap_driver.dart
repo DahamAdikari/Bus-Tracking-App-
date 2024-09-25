@@ -4,8 +4,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class BusLocationMapPage extends StatefulWidget {
   final String busId;
+  final String userID;
 
-  BusLocationMapPage({required this.busId});
+  BusLocationMapPage({required this.busId, required this.userID});
 
   @override
   _BusLocationMapPageState createState() => _BusLocationMapPageState();
@@ -22,6 +23,8 @@ class _BusLocationMapPageState extends State<BusLocationMapPage> {
       ),
       body: StreamBuilder<DocumentSnapshot>(
         stream: FirebaseFirestore.instance
+            .collection("driver")
+            .doc(widget.userID)
             .collection('buses')
             .doc(widget.busId)
             .snapshots(),
