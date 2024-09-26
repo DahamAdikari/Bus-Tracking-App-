@@ -30,6 +30,7 @@ class _BusDetailsPageState extends State<BusDetailsPage> {
   List<Map<String, String>> _timetable = []; // Timetable array for return trip
   Map<String, dynamic>? seatData; // To store seat data
   bool _isLoadingSeats = false; // To track seat data loading
+  bool isBookingAvailable = false;
 
   @override
   void initState() {
@@ -51,6 +52,7 @@ class _BusDetailsPageState extends State<BusDetailsPage> {
         busData = data;
         isOnline = busData!['isOnline'] ?? false;
         hasReturnTrip = busData!['hasReturnTrip'] ?? false;
+        isBookingAvailable = busData!['bookingAvailable'] ?? false;
         destinationLocation = busData!['destinationLocation'] ?? '';
         sourceLocation = busData!['sourceLocation'] ?? '';
         // Fetch timetable for return trip (replace timetableorg with timetable)
@@ -167,6 +169,22 @@ class _BusDetailsPageState extends State<BusDetailsPage> {
   void _stopReturnTripLocationUpdates() {
     _returnTripLocationSubscription?.cancel();
   }
+
+  Future<void> _updateBookingAvailability(bool status) async {
+  try {
+    await FirebaseFirestore.instance
+        .collection('driver')
+        .doc(widget.userID)
+        .collection('buses')
+        .doc(widget.busId)
+        .update({
+      'bookingAvailable': status, // Update booking availability field in Firestore
+    });
+    print("Booking availability updated to $status");
+  } catch (e) {
+    print("Error updating booking availability: $e");
+  }
+}
 
   Future<void> _updateReturnTripBusLocation(
       double latitude, double longitude) async {
@@ -569,6 +587,28 @@ class _BusDetailsPageState extends State<BusDetailsPage> {
                           ),
                         ],
                       ),
+
+                    // Booking Available toggle button
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Seat Booking Available',
+                          style: TextStyle(fontSize: 18),
+                        ),
+                        Switch(
+                          value: isBookingAvailable,
+                          onChanged: (value) async {
+                            setState(() {
+                              isBookingAvailable = value;
+                            });
+
+                            // Update the booking availability status in Firestore
+                            await _updateBookingAvailability(isBookingAvailable);
+                          },
+                        ),
+                      ],
+                    ),
 
                     // Display the seat layout if showSeatLayout is true
                     if (showSeatLayout)
