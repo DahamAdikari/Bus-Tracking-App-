@@ -95,24 +95,59 @@ class _SeatLayoutPageState extends State<SeatLayoutPage> {
     });
   }
 
-  // Function to update seat status
+  // Function to update seat status (block or clear)
   void _updateSeatStatus(String newStatus) {
     List<dynamic> updatedSeatLayout = List.from(seatData!['seatLayout']);
+    bool hasInvalidSeats = false;
 
-    // Loop through selected seats and update their status
     for (int index in _selectedSeats) {
-      updatedSeatLayout[index]['status'] = newStatus;
+      String currentStatus = updatedSeatLayout[index]['status'];
+
+      if (newStatus == 'blocked' && currentStatus != 'available') {
+        // Show error if trying to block non-available seats
+        hasInvalidSeats = true;
+      } else if (newStatus == 'available' && currentStatus != 'booked') {
+        // Show error if trying to clear non-booked seats
+        hasInvalidSeats = true;
+      } else {
+        updatedSeatLayout[index]['status'] = newStatus;
+      }
+    }
+
+    if (hasInvalidSeats) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Invalid operation. Please select the correct seat type.'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } else {
+      setState(() {
+        seatData!['seatLayout'] = updatedSeatLayout; // Update seat layout locally
+        _selectedSeats.clear(); // Clear selection after update
+      });
+    }
+  }
+
+  // Function to reset all booked and blocked seats to 'available'
+  void _resetSeats() {
+    List<dynamic> updatedSeatLayout = List.from(seatData!['seatLayout']);
+
+    for (int i = 0; i < updatedSeatLayout.length; i++) {
+      if (updatedSeatLayout[i]['status'] == 'booked' || updatedSeatLayout[i]['status'] == 'blocked') {
+        updatedSeatLayout[i]['status'] = 'available'; // Reset to 'available'
+      }
     }
 
     setState(() {
       seatData!['seatLayout'] = updatedSeatLayout; // Update local data
-      _selectedSeats.clear(); // Clear selection after update
+      _selectedSeats.clear(); // Clear selection
     });
   }
 
   // Function to confirm seat selection and pass data back
   void _confirmSeats() {
-    // Save updated seat data to Firestore
     FirebaseFirestore.instance
         .collection('driver')
         .doc(widget.userID)
@@ -130,6 +165,27 @@ class _SeatLayoutPageState extends State<SeatLayoutPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Edit Seat Layout'),
+        actions: [
+          ElevatedButton(
+            onPressed: () {
+              _resetSeats(); // Call reset function on button press
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.orange,
+              foregroundColor: Colors.black, 
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.refresh, color: Colors.black), // Add reset icon
+                SizedBox(width: 4), // Space between icon and text
+                Text(
+                  'Reset',
+                  style: TextStyle(fontSize: 16), // Customize text style
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator()) // Loading spinner
@@ -203,19 +259,33 @@ class _SeatLayoutPageState extends State<SeatLayoutPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          ElevatedButton(
-            onPressed: () {
-              _updateSeatStatus('blocked'); // Block selected seats
-            },
-            child: Text('Block Seats'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              _updateSeatStatus('available'); // Clear bookings
-            },
-            child: Text('Clear Bookings'),
-          ),
+          _buildElevatedButton('Block Selected Seats', Colors.brown, () {
+            _updateSeatStatus('blocked'); // Block selected seats
+          }),
+          _buildElevatedButton('Clear Selected Bookings', Colors.indigo, () {
+            _updateSeatStatus('available'); // Clear bookings
+          }),
         ],
+      ),
+    );
+  }
+
+  // Function to build a styled elevated button
+  Widget _buildElevatedButton(String text, Color color, VoidCallback onPressed) {
+    return ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: color, // Set the button color
+        foregroundColor: Colors.white, // Set the text color
+        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10), // Add padding
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(25), // Rounded corners
+        ),
+        elevation: 5, // Add elevation for shadow effect
+      ),
+      child: Text(
+        text,
+        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold), // Custom text style
       ),
     );
   }
@@ -224,10 +294,7 @@ class _SeatLayoutPageState extends State<SeatLayoutPage> {
   Widget _buildConfirmButton() {
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: ElevatedButton(
-        onPressed: _confirmSeats, // Navigate back and pass seat data
-        child: Text('Confirm'),
-      ),
+      child: _buildElevatedButton('Confirm', Colors.blue, _confirmSeats), // Confirm button
     );
   }
 }
