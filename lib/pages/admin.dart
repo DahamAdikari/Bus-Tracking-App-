@@ -33,6 +33,7 @@ class _AdminPageState extends State<AdminPage> {
   int? _rows;                  // Store number of rows
   int? _seatCount;             // Store seat count
   int? _selectedModel;         // Store selected model
+  bool? bookingAvailable;
 
   @override
   void initState() {
@@ -73,6 +74,7 @@ class _AdminPageState extends State<AdminPage> {
           );
 
           _hasReturnTrip = data['hasReturnTrip'];
+          bookingAvailable = data['bookingAvailable'];
         });
       }
     } catch (e) {
@@ -323,14 +325,13 @@ class _AdminPageState extends State<AdminPage> {
         'hasReturnTrip': _hasReturnTrip,
         'onWay': false,
         'timetable': null,
-
-        // Add seatData to Firestore
         'seatData': {
           'seatLayout': _seatLayout,
           'rows': _rows,
           'seatCount': _seatCount,
           'selectedModel': _selectedModel,
         },
+        'bookingAvailable': bookingAvailable,
       }).then((_) {
         // Update 'isadd' to true in the registration collection
         FirebaseFirestore.instance
@@ -355,6 +356,7 @@ class _AdminPageState extends State<AdminPage> {
           _rows = null;
           _seatCount = null;
           _selectedModel = null;
+          bookingAvailable = null; 
         });
       }).catchError((error) {
         ScaffoldMessenger.of(context).showSnackBar(

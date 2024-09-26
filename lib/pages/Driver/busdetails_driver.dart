@@ -24,9 +24,12 @@ class _BusDetailsPageState extends State<BusDetailsPage> {
   bool isOnline = false;
   bool hasReturnTrip = false;
   bool isReturnTripActive = false; // For the toggle button state
+  bool showSeatLayout = false; // Flag to show/hide seat layout
   String destinationLocation = '';
   String sourceLocation = '';
   List<Map<String, String>> _timetable = []; // Timetable array for return trip
+  Map<String, dynamic>? seatData; // To store seat data
+  bool _isLoadingSeats = false; // To track seat data loading
 
   @override
   void initState() {
@@ -264,6 +267,108 @@ class _BusDetailsPageState extends State<BusDetailsPage> {
     }
   }
 
+  // Function to fetch seat data
+  Future<void> _fetchSeatData() async {
+    setState(() {
+      _isLoadingSeats = true;
+    });
+
+    try {
+      DocumentSnapshot doc = await FirebaseFirestore.instance
+          .collection('driver')
+          .doc(widget.userID)
+          .collection('buses')
+          .doc(widget.busId)
+          .get();
+
+      if (doc.exists && doc.data() != null) {
+        var data = doc.data() as Map<String, dynamic>;
+        setState(() {
+          seatData = data['seatData'] ?? {};
+          _isLoadingSeats = false;
+        });
+      } else {
+        print("No seat data found.");
+        setState(() {
+          _isLoadingSeats = false;
+        });
+      }
+    } catch (e) {
+      print('Error fetching seat data: $e');
+      setState(() {
+        _isLoadingSeats = false;
+      });
+    }
+  }
+
+  // Build seat layout
+  Widget _buildSeatLayout() {
+    if (seatData == null || seatData!['seatLayout'] == null) {
+      return Text("No seat layout available");
+    }
+
+    List<dynamic> seatLayout = seatData!['seatLayout'];
+    int seatModel = seatData!['selectedModel']; // Fetch seat model
+    int _crossAxisCount;
+    double _crossAxisSpacing;
+    double _mainAxisSpacing;
+
+    // Set layout based on seat model
+    switch (seatModel) {
+      case 1: // 1x2 model
+        _crossAxisCount = 4; // 1 seat, aisle, 2 seats
+        _crossAxisSpacing = 10.0;
+        _mainAxisSpacing = 10.0;
+        break;
+      case 2: // 2x2 model
+        _crossAxisCount = 5; // 2 seats, aisle, 2 seats
+        _crossAxisSpacing = 12.0;
+        _mainAxisSpacing = 12.0;
+        break;
+      case 3: // 2x3 model
+        _crossAxisCount = 6; // 2 seats, aisle, 3 seats
+        _crossAxisSpacing = 14.0;
+        _mainAxisSpacing = 14.0;
+        break;
+      default:
+        _crossAxisCount = 4; // Default layout
+        _crossAxisSpacing = 10.0;
+        _mainAxisSpacing = 10.0;
+    }
+
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(), // Disable scrolling
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: _crossAxisCount,
+        crossAxisSpacing: _crossAxisSpacing,
+        mainAxisSpacing: _mainAxisSpacing,
+      ),
+      itemCount: seatLayout.length,
+      itemBuilder: (context, index) {
+        var seat = seatLayout[index];
+        String status = seat['status'] ?? 'Unknown';
+
+        Color seatColor = status == 'available'
+            ? Colors.green
+            : status == 'booked'
+                ? Colors.red
+                : Colors.grey;
+
+        return Container(
+          decoration: BoxDecoration(
+            color: seatColor,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.black),
+          ),
+          child: Center(
+            child: Text('${seat['row']}-${seat['col']}'),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -398,13 +503,36 @@ class _BusDetailsPageState extends State<BusDetailsPage> {
                     ),
 
                     // "Go online" toggle button
-                    ElevatedButton(
-                      onPressed: _toggleOnlineStatus,
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        backgroundColor: isOnline ? Colors.red : Colors.green,
-                      ),
-                      child: Text(isOnline ? 'Go Offline' : 'Go Online'),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // "Go online" toggle button
+                        ElevatedButton(
+                          onPressed: _toggleOnlineStatus,
+                          style: ElevatedButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            backgroundColor: isOnline ? Colors.red : Colors.green,
+                          ),
+                          child: Text(isOnline ? 'Go Offline' : 'Go Online'),
+                        ),
+                        // "View Seats" button
+                        ElevatedButton(
+                            onPressed: () {
+                              setState(() {
+                                showSeatLayout = !showSeatLayout;
+                                if (showSeatLayout) {
+                                  _fetchSeatData();
+                                }
+                              });
+                            },
+                            style: ElevatedButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              backgroundColor: Colors.orange,
+                            ),
+                            child: Text(
+                                showSeatLayout ? 'Hide Seats' : 'View Seats'),
+                          ),
+                      ],
                     ),
                     SizedBox(height: 10),
 
@@ -441,6 +569,12 @@ class _BusDetailsPageState extends State<BusDetailsPage> {
                           ),
                         ],
                       ),
+
+                    // Display the seat layout if showSeatLayout is true
+                    if (showSeatLayout)
+                      _isLoadingSeats
+                          ? Center(child: CircularProgressIndicator())
+                          : _buildSeatLayout(),
                   ],
                 ),
               ),

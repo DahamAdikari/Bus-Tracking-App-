@@ -129,7 +129,7 @@ class _SeatBookingState extends State<SeatBooking> {
               ),
             ),
             child: Center(
-              child: Text('Row: ${seat['row']}, Col: ${seat['col']}'), // Display seat info
+              child: Text('Row: ${seat['row']}, Col: ${seat['col']}', textAlign: TextAlign.center), // Display seat info
             ),
           ),
         );

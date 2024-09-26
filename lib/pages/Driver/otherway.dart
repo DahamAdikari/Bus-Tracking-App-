@@ -288,6 +288,7 @@ class _AddBusPageState extends State<AddBusPage> {
         'seatLayout': flatSeatLayout, // Store the flattened seat layout
       },
       'isOnline': false,
+      'bookingAvailable': false,
       'createdAt': FieldValue.serverTimestamp(),
     }).then((_) {
       ScaffoldMessenger.of(context).showSnackBar(
