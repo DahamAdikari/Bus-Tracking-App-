@@ -79,13 +79,28 @@ class _SeatBookingState extends State<SeatBooking> {
 
   // Toggle seat selection
   void _toggleSeatSelection(int index) {
-    setState(() {
-      if (_selectedSeats.contains(index)) {
-        _selectedSeats.remove(index); // Deselect if already selected
-      } else {
-        _selectedSeats.add(index); // Select seat
-      }
-    });
+    var seat = seatData!['seatLayout'][index]; // Get seat data at the index
+    String status = seat['status'] ?? 'unknown'; // Get seat status (available, booked, etc.)
+
+    // Check if seat is available before allowing selection
+    if (status == 'available') {
+      setState(() {
+        if (_selectedSeats.contains(index)) {
+          _selectedSeats.remove(index); // Deselect if already selected
+        } else {
+          _selectedSeats.add(index); // Select seat
+        }
+      });
+    } else {
+      // Show snackbar message when seat is not available
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Seat is not available.'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   // Build seat layout grid
@@ -104,16 +119,17 @@ class _SeatBookingState extends State<SeatBooking> {
         String status = seat['status'] ?? 'unknown'; // Seat status (available, booked, etc.)
         bool isSelected = _selectedSeats.contains(index); // Check if selected
 
+        // Set seat color based on status
         Color seatColor;
         if (isSelected) {
           seatColor = Colors.blue; // Highlight selected seats in blue
         } else {
           if (status == 'available') {
-            seatColor = Colors.green;
+            seatColor = Colors.green; // Available seats are green
           } else if (status == 'booked') {
-            seatColor = Colors.red;
+            seatColor = Colors.red; // Booked seats are red
           } else {
-            seatColor = Color.fromARGB(106, 180, 175, 175);
+            seatColor = Color.fromARGB(106, 180, 175, 175); // Empty/unknown seats are grey
           }
         }
 
