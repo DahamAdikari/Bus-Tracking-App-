@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:test_4/pages/Driver/Addbushalt_driver.dart';
+import 'package:test_4/pages/Driver/editseats_driver.dart';
 
 class EditBusDetails extends StatefulWidget {
   final String busId;
@@ -22,6 +23,8 @@ class _EditBusDetailsState extends State<EditBusDetails> {
       TextEditingController();
   late StreamSubscription<DocumentSnapshot> _busStreamSubscription;
   late Stream<DocumentSnapshot> _busStream;
+
+  List<dynamic> seatLayout = [];
 
   @override
   void initState() {
@@ -56,6 +59,7 @@ class _EditBusDetailsState extends State<EditBusDetails> {
       _sourceLocationController.text = snapshot['sourceLocation'] ?? '';
       _destinationLocationController.text =
           snapshot['destinationLocation'] ?? '';
+      seatLayout = List.from(snapshot['seatLayout'] ?? []);
     });
   }
 
@@ -70,6 +74,7 @@ class _EditBusDetailsState extends State<EditBusDetails> {
       'routeNum': _routeNumController.text,
       'sourceLocation': _sourceLocationController.text,
       'destinationLocation': _destinationLocationController.text,
+      'seatLayout': seatLayout,
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -131,6 +136,24 @@ class _EditBusDetailsState extends State<EditBusDetails> {
           .doc(widget.busId)
           .update({
         'busHalts': busHalts,
+      });
+    }
+  }
+
+  void _editSeats() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SeatLayoutPage(
+          busId: widget.busId,
+          userID: widget.userID,
+        ),
+      ),
+    );
+    // Update seat layout if it was modified
+    if (result != null) {
+      setState(() {
+        seatLayout = result; // Update seat layout in EditBusDetails
       });
     }
   }
@@ -207,13 +230,26 @@ class _EditBusDetailsState extends State<EditBusDetails> {
                   child: Text('Add Bus Halt'),
                 ),
                 SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: _saveChanges,
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    backgroundColor: Colors.lightBlue, // Text color
+                Center(
+                  child: ElevatedButton(
+                    onPressed:  _editSeats,
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: Colors.lightBlue, // Text color
+                    ),
+                    child: Text('Edit Seats'),
                   ),
-                  child: Text('Save Changes'),
+                ),
+                SizedBox(height: 20),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: _saveChanges,
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: Colors.lightBlue, // Text color
+                    ),
+                    child: Text('Save Changes'),
+                  ),
                 ),
               ],
             ),

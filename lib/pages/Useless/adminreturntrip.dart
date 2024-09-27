@@ -31,7 +31,8 @@ class _returnTripState extends State<returnTrip> {
   List<dynamic>? _seatLayout;  
   int? _rows;   
   int? _seatCount;  
-  int? _selectedModel;  
+  int? _selectedModel;
+  bool? bookingAvailable; 
 
   @override
   void initState() {
@@ -72,6 +73,7 @@ class _returnTripState extends State<returnTrip> {
                 }),
           );
           _hasReturnTrip = data['hasReturnTrip'];
+          bookingAvailable = data['bookingAvailable'];
 
           _seatLayout = data['seatData']['seatLayout'];
           _rows = data['seatData']['rows'];
@@ -271,13 +273,13 @@ class _returnTripState extends State<returnTrip> {
         'hasReturnTrip': _hasReturnTrip,
         'onWay': false,
         'timetableorg': null,
-
         'seatData': {
           'seatLayout': _seatLayout,
           'rows': _rows,
           'seatCount': _seatCount,
           'selectedModel': _selectedModel,
         },
+        'bookingAvailable': bookingAvailable,
       }).then((_) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Return bus added successfully')),
@@ -292,6 +294,11 @@ class _returnTripState extends State<returnTrip> {
           destinationLocation = null;
           _selectedLocation = null;
           _busHalts.clear();
+          _seatLayout = null;
+          _rows = null;
+          _seatCount = null;
+          _selectedModel = null;
+          bookingAvailable = null;
         });
       }).catchError((error) {
         ScaffoldMessenger.of(context).showSnackBar(
