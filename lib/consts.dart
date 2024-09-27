@@ -1,1 +1,4 @@
 const String GOOGLE_MAPS_API_KEY = "AIzaSyB1j1rOUdwen8i7jnnhoxgiZIJUXbP8VBA";
+
+const String stripePublishableKey = "pk_test_51PpM3r06WPPcZOKOZ7M33ik2a7zRFNrGHkT4icWGrFls3nOiCrYd7GWmRh6fNL9FnugwYPqu0WP0sR7FZxRrG5it00fYzRvse9";
+const String stripeSecretKey = "sk_test_51PpM3r06WPPcZOKO7A7NUgnJHGACFqoUJSJxGw5I7HJr1KzbrrCuIGHnoWfpJBL3EjC5UbrrkthFhWzvTLXw5hfK00OJOrXeRX";

@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:test_4/services/stripe_service.dart';
+import 'package:test_4/ticket_screen.dart';
 
 class SeatBooking extends StatefulWidget {
+
   final String busId;
   final String driverId;
+  
 
   SeatBooking({required this.busId, required this.driverId});
 
@@ -18,6 +22,8 @@ class _SeatBookingState extends State<SeatBooking> {
   double _crossAxisSpacing = 10.0; // Default cross-axis spacing
   double _mainAxisSpacing = 10.0; // Default main-axis spacing
   List<int> _selectedSeats = []; // Track selected seats by their index
+  bool _paymentSuccess = false; // Track payment success
+
 
   @override
   void initState() {
@@ -104,6 +110,7 @@ class _SeatBookingState extends State<SeatBooking> {
         String status = seat['status'] ?? 'unknown'; // Seat status (available, booked, etc.)
         bool isSelected = _selectedSeats.contains(index); // Check if selected
 
+
         Color seatColor;
         if (isSelected) {
           seatColor = Colors.blue; // Highlight selected seats in blue
@@ -137,14 +144,54 @@ class _SeatBookingState extends State<SeatBooking> {
     );
   }
 
+
+
   // Build the booking button
   Widget _buildBookButton() {
     return ElevatedButton(
       onPressed: () {
+        int seatCount = _selectedSeats.length;
+        //StripeService.instance.makePayment();
         // Code to handle booking logic here
         // can use the _selectedSeats to update Firestore
+        if (seatCount > 0) {
+        StripeService.instance.makePayment(seatCount, widget.busId, _selectedSeats);
+        setState(() {
+            _paymentSuccess = true; // Update payment status
+          });
+      } else {
+        print("No seats selected.");
+      }
       },
       child: Text('Book Selected Seats'),
+    );
+  }
+
+  // Build the button to show tickets
+  Widget _buildShowTicketsButton() {
+    return ElevatedButton(
+      onPressed: () {
+        // Navigate to the ticket display page with seatCount (number of selected seats)
+        /*Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const TicketScreen()
+        ),
+        );
+        print("Show Tickets pressed");*/
+        int seatCount = _selectedSeats.length;
+      if (seatCount > 0) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => TicketScreen(seatCount: seatCount), // Pass the seat count
+          ),
+        );
+        print("Show Tickets pressed");
+      } else {
+        print("No seats selected.");
+      }
+      },
+      child: Text('Show Tickets'),
     );
   }
 
@@ -163,6 +210,11 @@ class _SeatBookingState extends State<SeatBooking> {
                   padding: const EdgeInsets.all(8.0),
                   child: _buildBookButton(), // Show booking button
                 ),
+                if (_paymentSuccess)
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: _buildShowTicketsButton(), // Show tickets button after payment
+                  ),
               ],
             ),
     );
