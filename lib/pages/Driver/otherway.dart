@@ -265,6 +265,12 @@ class _AddBusPageState extends State<AddBusPage> {
   }
 
   void _submitBus() {
+
+    if (_seatData == null || _seatData?['seatLayout'] == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Please add seat data before submitting the bus.')),
+    );}
+
     List<Map<String, dynamic>>? flatSeatLayout =
         flattenSeatLayout(_seatData?['seatLayout']);
 
