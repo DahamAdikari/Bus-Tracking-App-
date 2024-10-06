@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:test_4/pages/Driver/MapSelection.dart';
+
 import './otherway.dart';
 
 class RegistrationPageClass extends StatefulWidget {
@@ -19,6 +22,9 @@ class RegistrationPage extends State<RegistrationPageClass> {
   String? busID;
   String? busName;
   String? routeNum;
+  String? numberPlate;
+  LatLng? sourceLocationLatLng;
+  LatLng? destinationLocationLatLng;
   String? sourceLocation;
   String? destinationLocation;
 
@@ -80,6 +86,18 @@ class RegistrationPage extends State<RegistrationPageClass> {
                   },
                 ),
                 TextFormField(
+                  decoration: InputDecoration(labelText: 'Number Plate'),
+                  onSaved: (value) {
+                    numberPlate = value;
+                  },
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter the number plate';
+                    }
+                    return null;
+                  },
+                ),
+                TextFormField(
                   decoration: InputDecoration(labelText: 'Source Location'),
                   onSaved: (value) {
                     sourceLocation = value;
@@ -91,6 +109,28 @@ class RegistrationPage extends State<RegistrationPageClass> {
                     return null;
                   },
                 ),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () async {
+                    final LatLng? result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            GoogleMapPage(), // Page for selecting source location
+                      ),
+                    );
+
+                    if (result != null) {
+                      setState(() {
+                        sourceLocationLatLng = result;
+                      });
+                    }
+                  },
+                  child: Text('Select Source Location'),
+                ),
+                if (sourceLocationLatLng != null)
+                  Text(
+                      'Source: ${sourceLocationLatLng!.latitude}, ${sourceLocationLatLng!.longitude}'),
                 TextFormField(
                   decoration:
                       InputDecoration(labelText: 'Destination Location'),
@@ -104,6 +144,27 @@ class RegistrationPage extends State<RegistrationPageClass> {
                     return null;
                   },
                 ),
+                ElevatedButton(
+                  onPressed: () async {
+                    final LatLng? result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            GoogleMapPage(), // Page for selecting destination location
+                      ),
+                    );
+
+                    if (result != null) {
+                      setState(() {
+                        destinationLocationLatLng = result;
+                      });
+                    }
+                  },
+                  child: Text('Select Destination Location'),
+                ),
+                if (destinationLocationLatLng != null)
+                  Text(
+                      'Destination: ${destinationLocationLatLng!.latitude}, ${destinationLocationLatLng!.longitude}'),
                 SizedBox(height: 20),
                 Text('Timetable',
                     style: TextStyle(fontWeight: FontWeight.bold)),
@@ -116,7 +177,9 @@ class RegistrationPage extends State<RegistrationPageClass> {
                 SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () {
-                    if (_formKey.currentState!.validate()) {
+                    if (_formKey.currentState!.validate() &&
+                        sourceLocationLatLng != null &&
+                        destinationLocationLatLng != null) {
                       _formKey.currentState!.save();
 
                       Navigator.push(
@@ -127,12 +190,21 @@ class RegistrationPage extends State<RegistrationPageClass> {
                             busID: busID!,
                             busName: busName!,
                             routeNum: routeNum!,
+                            sourceLocationLatLng: sourceLocationLatLng!,
+                            destinationLocationLatLng:
+                                destinationLocationLatLng!,
+                            numberPlate: numberPlate!,
                             sourceLocation: sourceLocation!,
                             destinationLocation: destinationLocation!,
-                            timetable_org:
-                                _timetable, // Pass timetable to the next page
+                            timetable_org: _timetable,
                           ),
                         ),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                            content: Text(
+                                'Please select source and destination locations')),
                       );
                     }
                   },
@@ -146,7 +218,6 @@ class RegistrationPage extends State<RegistrationPageClass> {
     );
   }
 
-  // Widget to build timetable input section
   Widget _buildTimetable() {
     return Column(
       children: _timetable.map((entry) {
@@ -155,11 +226,9 @@ class RegistrationPage extends State<RegistrationPageClass> {
           children: [
             Expanded(
               child: TextFormField(
-                readOnly:
-                    true, // Make it read-only so the user can't type directly
+                readOnly: true,
                 decoration: InputDecoration(labelText: 'Departure Time'),
-                controller: TextEditingController(
-                    text: entry['departureTime']), // Display selected time
+                controller: TextEditingController(text: entry['departureTime']),
                 onTap: () async {
                   TimeOfDay? pickedTime = await showTimePicker(
                     context: context,
@@ -177,10 +246,9 @@ class RegistrationPage extends State<RegistrationPageClass> {
             SizedBox(width: 10),
             Expanded(
               child: TextFormField(
-                readOnly: true, // Make it read-only
+                readOnly: true,
                 decoration: InputDecoration(labelText: 'Arrival Time'),
-                controller: TextEditingController(
-                    text: entry['arrivalTime']), // Display selected time
+                controller: TextEditingController(text: entry['arrivalTime']),
                 onTap: () async {
                   TimeOfDay? pickedTime = await showTimePicker(
                     context: context,
@@ -209,7 +277,6 @@ class RegistrationPage extends State<RegistrationPageClass> {
     );
   }
 
-  // Add new timetable row
   void _addTimetableRow() {
     setState(() {
       _timetable.add({
@@ -219,7 +286,6 @@ class RegistrationPage extends State<RegistrationPageClass> {
     });
   }
 
-  // Format time to 24-hour format
   String _formatTime(TimeOfDay time) {
     final now = DateTime.now();
     final dt = DateTime(now.year, now.month, now.day, time.hour, time.minute);
