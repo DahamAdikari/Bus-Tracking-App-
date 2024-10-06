@@ -17,7 +17,7 @@ Rashmi
 6. Add seat data to the return trip - done
 7. develop seat blocking part and clear bookings from driver side - done
 8. develop seat booking from pasenger
-one issue solved in registering bus
+one issue solved in registering bus - 
 
 Dishmi
 1.
