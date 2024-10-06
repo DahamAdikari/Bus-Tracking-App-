@@ -150,12 +150,33 @@ class _EditBusDetailsState extends State<EditBusDetails> {
         ),
       ),
     );
-    // Update seat layout if it was modified
+    // Check if result is not null and a Map type, and then flatten it
     if (result != null) {
-      setState(() {
-        seatLayout = result; // Update seat layout in EditBusDetails
-      });
+      if (result is List<List<Map<String, dynamic>>>) {
+        // If result is a nested list, flatten it
+        setState(() {
+          seatLayout = flattenSeatLayout(result);
+        });
+      }
     }
+  }
+
+  // Helper function to flatten seat layout
+  List<Map<String, dynamic>> flattenSeatLayout(
+      List<List<Map<String, dynamic>>> seatLayout) {
+    List<Map<String, dynamic>> flatList = [];
+
+    for (int row = 0; row < seatLayout.length; row++) {
+      for (int col = 0; col < seatLayout[row].length; col++) {
+        Map<String, dynamic> seat = seatLayout[row][col];
+        flatList.add({
+          'row': row,
+          'col': col,
+          'status': seat['status'],
+        });
+      }
+    }
+    return flatList;
   }
 
   @override
