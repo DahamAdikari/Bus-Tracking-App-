@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:test_4/addbusHalt.dart';
+import 'package:test_4/pages/Driver/MapSelection.dart';
 import 'package:test_4/pages/SelectCurrentAdmin.dart';
 import 'package:test_4/pages/Useless/SeatLayoutDriver.dart';
 import 'package:test_4/pages/Useless/adminreturntrip.dart';
@@ -29,10 +30,15 @@ class _AdminPageState extends State<AdminPage> {
   bool? _hasReturnTrip; // Store return trip info
   String? userID; // User ID from Firestore
   bool _isLoading = true; // Track loading state
-  List<dynamic>? _seatLayout;  // Store seat layout
-  int? _rows;                  // Store number of rows
-  int? _seatCount;             // Store seat count
-  int? _selectedModel;         // Store selected model
+  List<dynamic>? _seatLayout; // Store seat layout
+  int? _rows; // Store number of rows
+  int? _seatCount; // Store seat count
+  int? _selectedModel; // Store selected model
+  bool? bookingAvailable;
+  String? numberPlate;
+  LatLng? sourceLatLng; // Store source location LatLng
+  LatLng? destinationLatLng; // Store destination location LatLng
+  String? ticketPrice; // Store ticket price
 
   @override
   void initState() {
@@ -58,6 +64,18 @@ class _AdminPageState extends State<AdminPage> {
           sourceLocation = data['sourceLocation'];
           destinationLocation = data['destinationLocation'];
           userID = data['userID']; // Get the userID to submit later
+          numberPlate = data['numberPlate']; // Fetch numberPlate
+          ticketPrice = data['ticketPrice']; // Fetch ticketPrice
+
+          // Source and Destination LatLng
+          if (data['sourceLatLng'] != null) {
+            sourceLatLng = LatLng(data['sourceLatLng']['latitude'],
+                data['sourceLatLng']['longitude']);
+          }
+          if (data['destinationLatLng'] != null) {
+            destinationLatLng = LatLng(data['destinationLatLng']['latitude'],
+                data['destinationLatLng']['longitude']);
+          }
           _selectedLocation =
               data['latitude'] != null && data['longitude'] != null
                   ? LatLng(data['latitude'], data['longitude'])
@@ -73,6 +91,7 @@ class _AdminPageState extends State<AdminPage> {
           );
 
           _hasReturnTrip = data['hasReturnTrip'];
+          bookingAvailable = data['bookingAvailable'];
         });
       }
     } catch (e) {
@@ -107,10 +126,62 @@ class _AdminPageState extends State<AdminPage> {
                           (value) => routeNum = value),
                       _buildTextFormField('Source Location', sourceLocation,
                           (value) => sourceLocation = value),
+                      // Button for changing the Source Location
+                      ElevatedButton(
+                        onPressed: () async {
+                          final result = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  GoogleMapPage(), // Navigate to GoogleMapPage
+                            ),
+                          );
+
+                          if (result != null) {
+                            setState(() {
+                              sourceLatLng = result; // Update source location
+                            });
+                          }
+                        },
+                        child: Text('Edit Source Location'),
+                      ),
+                      if (sourceLatLng != null)
+                        Text(
+                            'Source Location: Lat: ${sourceLatLng!.latitude}, Lng: ${sourceLatLng!.longitude}'),
+
                       _buildTextFormField(
                           'Destination Location',
                           destinationLocation,
                           (value) => destinationLocation = value),
+                      // Button for changing the Destination Location
+                      ElevatedButton(
+                        onPressed: () async {
+                          final result = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  GoogleMapPage(), // Navigate to GoogleMapPage
+                            ),
+                          );
+
+                          if (result != null) {
+                            setState(() {
+                              destinationLatLng =
+                                  result; // Update destination location
+                            });
+                          }
+                        },
+                        child: Text('Edit Destination Location'),
+                      ),
+
+                      if (destinationLatLng != null)
+                        Text(
+                            'Destination Location: Lat: ${destinationLatLng!.latitude}, Lng: ${destinationLatLng!.longitude}'),
+                      _buildTextFormField('Number Plate', numberPlate,
+                          (value) => numberPlate = value),
+
+                      _buildTextFormField('Ticket Price', ticketPrice,
+                          (value) => ticketPrice = value),
 
                       SizedBox(height: 20),
 
@@ -174,22 +245,29 @@ class _AdminPageState extends State<AdminPage> {
                             final result = await Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => DisplaySeats(docID: widget.docID!), // Pass docID to DisplaySeats
+                                builder: (context) => DisplaySeats(
+                                    docID: widget
+                                        .docID!), // Pass docID to DisplaySeats
                               ),
                             );
 
                             if (result != null) {
                               setState(() {
-                                _seatLayout = result['seatLayout']; // Get seat layout
-                                _rows = result['rows'];             // Get number of rows
-                                _seatCount = result['seatCount'];   // Get seat count
-                                _selectedModel = result['selectedModel']; // Get selected model
+                                _seatLayout =
+                                    result['seatLayout']; // Get seat layout
+                                _rows = result['rows']; // Get number of rows
+                                _seatCount =
+                                    result['seatCount']; // Get seat count
+                                _selectedModel = result[
+                                    'selectedModel']; // Get selected model
                               });
                             }
                           } else {
                             // Show an error message if the docID is null
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Document ID is not available. Cannot proceed to add seats.')),
+                              SnackBar(
+                                  content: Text(
+                                      'Document ID is not available. Cannot proceed to add seats.')),
                             );
                           }
                         },
@@ -210,6 +288,14 @@ class _AdminPageState extends State<AdminPage> {
                             setState(() {
                               _selectedLocation = result;
                             });
+                          } else {
+                            // Handle the case where the user didn't select a location
+                            // For example, you could show an error message or prevent further actions
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Please select a location.'),
+                              ),
+                            );
                           }
                         },
                         child: Text('Add Current Location of the Bus'),
@@ -315,6 +401,8 @@ class _AdminPageState extends State<AdminPage> {
         'routeNum': routeNum,
         'sourceLocation': sourceLocation,
         'destinationLocation': destinationLocation,
+        'numberPlate': numberPlate, // Include numberPlate
+        'ticketPrice': ticketPrice, // Include ticketPrice
         'latitude': _selectedLocation?.latitude,
         'longitude': _selectedLocation?.longitude,
         'busHalts': _busHalts,
@@ -323,14 +411,21 @@ class _AdminPageState extends State<AdminPage> {
         'hasReturnTrip': _hasReturnTrip,
         'onWay': false,
         'timetable': null,
-
-        // Add seatData to Firestore
+        'sourceLatLng': {
+          'latitude': sourceLatLng?.latitude,
+          'longitude': sourceLatLng?.longitude,
+        }, // Include sourceLatLng
+        'destinationLatLng': {
+          'latitude': destinationLatLng?.latitude,
+          'longitude': destinationLatLng?.longitude,
+        }, // Include destinationLatLng
         'seatData': {
           'seatLayout': _seatLayout,
           'rows': _rows,
           'seatCount': _seatCount,
           'selectedModel': _selectedModel,
         },
+        'bookingAvailable': bookingAvailable,
       }).then((_) {
         // Update 'isadd' to true in the registration collection
         FirebaseFirestore.instance
@@ -355,6 +450,7 @@ class _AdminPageState extends State<AdminPage> {
           _rows = null;
           _seatCount = null;
           _selectedModel = null;
+          bookingAvailable = null;
         });
       }).catchError((error) {
         ScaffoldMessenger.of(context).showSnackBar(

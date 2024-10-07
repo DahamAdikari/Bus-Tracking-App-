@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:test_4/pages/Driver/Addbushalt_driver.dart';
+import 'package:test_4/pages/Driver/editseats_driver.dart';
 
 class EditBusDetails extends StatefulWidget {
   final String busId;
@@ -22,6 +23,8 @@ class _EditBusDetailsState extends State<EditBusDetails> {
       TextEditingController();
   late StreamSubscription<DocumentSnapshot> _busStreamSubscription;
   late Stream<DocumentSnapshot> _busStream;
+
+  List<dynamic> seatLayout = [];
 
   @override
   void initState() {
@@ -56,6 +59,7 @@ class _EditBusDetailsState extends State<EditBusDetails> {
       _sourceLocationController.text = snapshot['sourceLocation'] ?? '';
       _destinationLocationController.text =
           snapshot['destinationLocation'] ?? '';
+      seatLayout = List.from(snapshot['seatLayout'] ?? []);
     });
   }
 
@@ -70,6 +74,7 @@ class _EditBusDetailsState extends State<EditBusDetails> {
       'routeNum': _routeNumController.text,
       'sourceLocation': _sourceLocationController.text,
       'destinationLocation': _destinationLocationController.text,
+      'seatLayout': seatLayout,
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -133,6 +138,45 @@ class _EditBusDetailsState extends State<EditBusDetails> {
         'busHalts': busHalts,
       });
     }
+  }
+
+  void _editSeats() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SeatLayoutPage(
+          busId: widget.busId,
+          userID: widget.userID,
+        ),
+      ),
+    );
+    // Check if result is not null and a Map type, and then flatten it
+    if (result != null) {
+      if (result is List<List<Map<String, dynamic>>>) {
+        // If result is a nested list, flatten it
+        setState(() {
+          seatLayout = flattenSeatLayout(result);
+        });
+      }
+    }
+  }
+
+  // Helper function to flatten seat layout
+  List<Map<String, dynamic>> flattenSeatLayout(
+      List<List<Map<String, dynamic>>> seatLayout) {
+    List<Map<String, dynamic>> flatList = [];
+
+    for (int row = 0; row < seatLayout.length; row++) {
+      for (int col = 0; col < seatLayout[row].length; col++) {
+        Map<String, dynamic> seat = seatLayout[row][col];
+        flatList.add({
+          'row': row,
+          'col': col,
+          'status': seat['status'],
+        });
+      }
+    }
+    return flatList;
   }
 
   @override
@@ -207,13 +251,26 @@ class _EditBusDetailsState extends State<EditBusDetails> {
                   child: Text('Add Bus Halt'),
                 ),
                 SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: _saveChanges,
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    backgroundColor: Colors.lightBlue, // Text color
+                Center(
+                  child: ElevatedButton(
+                    onPressed:  _editSeats,
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: Colors.lightBlue, // Text color
+                    ),
+                    child: Text('Edit Seats'),
                   ),
-                  child: Text('Save Changes'),
+                ),
+                SizedBox(height: 20),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: _saveChanges,
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: Colors.lightBlue, // Text color
+                    ),
+                    child: Text('Save Changes'),
+                  ),
                 ),
               ],
             ),

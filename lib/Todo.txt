@@ -14,7 +14,10 @@ Rashmi
 3. modify admin page to load and display seat data and enable deleting and adding seats - done
 4. submit seat data to the drivercollection - Done
 5. fetch seat data to busdetails_passenger.dart - Done
-6. develop seat booking from pasenger and blocking part from driver
+6. Add seat data to the return trip - done
+7. develop seat blocking part and clear bookings from driver side - done
+8. develop seat booking from pasenger
+one issue solved in registering bus - 
 
 Dishmi
 1. Stripe payment intigration - Done
