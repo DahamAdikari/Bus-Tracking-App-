@@ -14,12 +14,15 @@ class SeatBooking extends StatefulWidget {
 }
 
 class _SeatBookingState extends State<SeatBooking> {
-  Map<String, dynamic>? seatData; // Seat data to be fetched from Firestore
+  Map<String, dynamic>? seatData;
   bool _isLoading = true; // For tracking data loading
   int _crossAxisCount = 4; // Default seat layout columns
   double _crossAxisSpacing = 10.0; // Default cross-axis spacing
   double _mainAxisSpacing = 10.0; // Default main-axis spacing
   List<int> _selectedSeats = []; // Track selected seats by their index
+  List<Map<String, dynamic>> _selectedSeatInfo =
+      []; // Track selected seats' row and column info
+
   bool _paymentSuccess = false; // Track payment success
 
   @override
@@ -82,11 +85,22 @@ class _SeatBookingState extends State<SeatBooking> {
 
   // Toggle seat selection
   void _toggleSeatSelection(int index) {
+    var seat = seatData!['seatLayout'][index]; // Get the seat data at the index
     setState(() {
+      // Remove the corresponding seat row and column from _selectedSeatInfo
+      _selectedSeatInfo.removeWhere((seatInfo) => seatInfo['index'] == index);
+
       if (_selectedSeats.contains(index)) {
         _selectedSeats.remove(index); // Deselect if already selected
       } else {
         _selectedSeats.add(index); // Select seat
+
+        // Add the seat's row and column to _selectedSeatInfo
+        _selectedSeatInfo.add({
+          'index': index,
+          'row': seat['row'],
+          'col': seat['col'],
+        });
       }
     });
   }
