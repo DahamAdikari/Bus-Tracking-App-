@@ -9,12 +9,16 @@ class StripeService {
   StripeService._();
 
   static final StripeService instance = StripeService._();
+  
 
-  Future<void> makePayment(int seatCount, String busId, List<int> selectedSeats) async {
+  Future<void> makePayment(int seatCount, String busId, List<int> selectedSeats, String driverId, List<Map<String, dynamic>> selectedSeatInfo) async {
+        print('Making payment for $seatCount seats for bus $busId with driver $driverId.');
+    print('Selected seats: $selectedSeatInfo'); // Print the seat info (row and column)
     try {
       String? paymentIntentClientSecret = await _createPaymentIntent(
         100 * seatCount,
         "usd",
+        
       );
       if (paymentIntentClientSecret == null) return;
       await Stripe.instance.initPaymentSheet(
@@ -23,44 +27,70 @@ class StripeService {
           merchantDisplayName: "Daham Adikari",
         ),
       );
-      await _processPayment();
+      //await _processPayment();
+      bool paymentSuccessful = await _processPayment();
+
 
     // If payment is successful, update seat status in Firestore
-    await _updateSeatStatus(busId, selectedSeats);
+    //await _updateSeatStatus(busId, selectedSeats);
+
+    // Only update Firestore if payment is successful
+    if (paymentSuccessful) {
+      await _updateSeatStatus(busId, selectedSeatInfo, driverId);
+      print("Seats updated successfully in Firestore.");
+    } else {
+      print("Payment failed, seats not updated.");
+    }
 
     } catch (e) {
       print(e);
     }
+
   }
 
 
 
-  Future<void> _updateSeatStatus(String busId, List<int> selectedSeats) async {
+  Future<void> _updateSeatStatus(String busId, List<Map<String, dynamic>> selectedSeatInfo, String driverId) async {
   try {
     // Fetch the Firestore document for the bus
     DocumentReference busRef = FirebaseFirestore.instance
-        //.collection('driver')
-        //.doc(driverId)
+        .collection('driver')
+        .doc(driverId)
         .collection('buses')
         .doc(busId);
     
     DocumentSnapshot doc = await busRef.get();
     if (doc.exists && doc.data() != null) {
       var data = doc.data() as Map<String, dynamic>;
-      List<dynamic> seatLayout = data['seatLayout'];
+      
+      // Access seatData and then seatLayout inside it
+      if (data.containsKey('seatData') && data['seatData'] != null) {
+        Map<String, dynamic> seatData = data['seatData'];
+        List<dynamic> seatLayout = seatData['seatLayout'];
 
-      // Update the status of the selected seats to 'booked'
-      for (int index in selectedSeats) {
-        seatLayout[index]['status'] = 'booked';
+        // Update the status of the selected seats to 'booked'
+        for (Map<String, dynamic> seatInfo in selectedSeatInfo) {
+          int index = seatInfo['index']; // Extract the seat index from the info
+          seatLayout[index]['status'] = 'booked'; // Set the status to 'booked'
+        }
+
+        // Save the updated seatLayout back inside seatData, and update Firestore
+        seatData['seatLayout'] = seatLayout;
+        await busRef.update({'seatData': seatData});
+
+        print("Seat status updated successfully.");
+      } else {
+        print("No seatData found.");
       }
-
-      // Save the updated seat layout back to Firestore
-      await busRef.update({'seatLayout': seatLayout});
+    } else {
+      print("Bus document does not exist.");
     }
   } catch (e) {
     print('Error updating seat status: $e');
   }
 }
+
+
 
 
 
@@ -95,12 +125,15 @@ class StripeService {
     return null;
   }
 
-  Future<void> _processPayment() async {
+  Future<bool> _processPayment() async {
     try {
       await Stripe.instance.presentPaymentSheet();
       await Stripe.instance.confirmPaymentSheetPayment();
+      print("Payment successful");
+    return true; // Return true if payment is successful
     } catch (e) {
-      print(e);
+      print('error');
+      return false;
     }
   }
 
