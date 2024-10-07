@@ -20,4 +20,9 @@ Rashmi
 one issue solved in registering bus - 
 
 Dishmi
-1.
+1. Stripe payment intigration - Done
+2. Multiply the total amount according to number of seats selected - Done
+3. Disable reselection of the pre selected seats (get details from fire base)
+4. Add a colour for pre selected seats
+5. Disable reselection of optional seats
+6. Visualize the tickets after booking. Get the ticket details from fire base 
