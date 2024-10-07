@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:test_4/services/stripe_service.dart';
+import 'package:test_4/ticket_screen.dart';
 
 class SeatBooking extends StatefulWidget {
   final String busId;
@@ -12,12 +14,16 @@ class SeatBooking extends StatefulWidget {
 }
 
 class _SeatBookingState extends State<SeatBooking> {
-  Map<String, dynamic>? seatData; // Seat data to be fetched from Firestore
+  Map<String, dynamic>? seatData;
   bool _isLoading = true; // For tracking data loading
   int _crossAxisCount = 4; // Default seat layout columns
   double _crossAxisSpacing = 10.0; // Default cross-axis spacing
   double _mainAxisSpacing = 10.0; // Default main-axis spacing
   List<int> _selectedSeats = []; // Track selected seats by their index
+  List<Map<String, dynamic>> _selectedSeatInfo =
+      []; // Track selected seats' row and column info
+
+  bool _paymentSuccess = false; // Track payment success
 
   @override
   void initState() {
@@ -79,6 +85,7 @@ class _SeatBookingState extends State<SeatBooking> {
 
   // Toggle seat selection
   void _toggleSeatSelection(int index) {
+
     var seat = seatData!['seatLayout'][index]; // Get seat data at the index
     String status = seat['status'] ?? 'unknown'; // Get seat status (available, booked, etc.)
 
@@ -101,6 +108,7 @@ class _SeatBookingState extends State<SeatBooking> {
         ),
       );
     }
+
   }
 
   // Build seat layout grid
@@ -116,7 +124,8 @@ class _SeatBookingState extends State<SeatBooking> {
       itemCount: seatLayout.length, // Number of seats
       itemBuilder: (context, index) {
         var seat = seatLayout[index];
-        String status = seat['status'] ?? 'unknown'; // Seat status (available, booked, etc.)
+        String status = seat['status'] ??
+            'unknown'; // Seat status (available, booked, etc.)
         bool isSelected = _selectedSeats.contains(index); // Check if selected
 
         // Set seat color based on status
@@ -145,7 +154,9 @@ class _SeatBookingState extends State<SeatBooking> {
               ),
             ),
             child: Center(
+
               child: Text('Row: ${seat['row']}, Col: ${seat['col']}', textAlign: TextAlign.center), // Display seat info
+
             ),
           ),
         );
@@ -157,10 +168,50 @@ class _SeatBookingState extends State<SeatBooking> {
   Widget _buildBookButton() {
     return ElevatedButton(
       onPressed: () {
+        int seatCount = _selectedSeats.length;
+        //StripeService.instance.makePayment();
         // Code to handle booking logic here
         // can use the _selectedSeats to update Firestore
+        if (seatCount > 0) {
+          StripeService.instance.makePayment(
+              seatCount, widget.busId, _selectedSeats, widget.driverId);
+          setState(() {
+            _paymentSuccess = true; // Update payment status
+          });
+        } else {
+          print("No seats selected.");
+        }
       },
       child: Text('Book Selected Seats'),
+    );
+  }
+
+  // Build the button to show tickets
+  Widget _buildShowTicketsButton() {
+    return ElevatedButton(
+      onPressed: () {
+        // Navigate to the ticket display page with seatCount (number of selected seats)
+        /*Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const TicketScreen()
+        ),
+        );
+        print("Show Tickets pressed");*/
+        int seatCount = _selectedSeats.length;
+        if (seatCount > 0) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  TicketScreen(seatCount: seatCount), // Pass the seat count
+            ),
+          );
+          print("Show Tickets pressed");
+        } else {
+          print("No seats selected.");
+        }
+      },
+      child: Text('Show Tickets'),
     );
   }
 
@@ -179,6 +230,12 @@ class _SeatBookingState extends State<SeatBooking> {
                   padding: const EdgeInsets.all(8.0),
                   child: _buildBookButton(), // Show booking button
                 ),
+                if (_paymentSuccess)
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child:
+                        _buildShowTicketsButton(), // Show tickets button after payment
+                  ),
               ],
             ),
     );
