@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:test_4/pages/Driver/MapSelection.dart';
+import 'package:uuid/uuid.dart'; // Add uuid package for unique ID generation
 
 import './otherway.dart';
 
@@ -15,11 +16,12 @@ class RegistrationPageClass extends StatefulWidget {
 
 class RegistrationPage extends State<RegistrationPageClass> {
   final _formKey = GlobalKey<FormState>();
+  final Uuid uuid = Uuid();
+  String busID = ""; // Auto-generated Bus ID
   List<Map<String, String>> _timetable = [
     {'departureTime': '', 'arrivalTime': ''}
   ]; // Default timetable
 
-  String? busID;
   String? busName;
   String? routeNum;
   String? numberPlate;
@@ -34,6 +36,9 @@ class RegistrationPage extends State<RegistrationPageClass> {
   void initState() {
     super.initState();
     userID = widget.userID;
+
+    // Auto-generate a unique Bus ID
+    busID = uuid.v4(); // Generate unique ID using UUID
   }
 
   @override
@@ -51,15 +56,8 @@ class RegistrationPage extends State<RegistrationPageClass> {
               children: [
                 TextFormField(
                   decoration: InputDecoration(labelText: 'Bus ID'),
-                  onSaved: (value) {
-                    busID = value;
-                  },
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a valid bus ID';
-                    }
-                    return null;
-                  },
+                  initialValue: busID,
+                  readOnly: true, // Make this field read-only
                 ),
                 TextFormField(
                   decoration: InputDecoration(labelText: 'Bus Name'),
@@ -187,7 +185,7 @@ class RegistrationPage extends State<RegistrationPageClass> {
                         MaterialPageRoute(
                           builder: (context) => AddBusPage(
                             userID: userID,
-                            busID: busID!,
+                            busID: busID,
                             busName: busName!,
                             routeNum: routeNum!,
                             sourceLocationLatLng: sourceLocationLatLng!,
