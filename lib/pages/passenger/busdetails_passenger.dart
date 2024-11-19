@@ -51,6 +51,8 @@ class _BusDetailsPagePassengerState extends State<BusDetailsPagePassenger> {
           double longitude = busData['longitude']?.toDouble() ?? 0.0;
           LatLng busPosition = LatLng(latitude, longitude);
 
+          bool bookingAvailable = busData['bookingAvailable'] ?? false;
+
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -126,13 +128,28 @@ class _BusDetailsPagePassengerState extends State<BusDetailsPagePassenger> {
                     ),
                     ElevatedButton(
                       onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => SeatBooking(
-                                busId: widget.busId, driverId: widget.driverId),
-                          ),
-                        );
+                        if (bookingAvailable) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => SeatBooking(
+                                  busId: widget.busId,
+                                  driverId: widget.driverId),
+                            ),
+                          );
+                        } else {
+                          // Show snackbar message when booking is not available
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Booking is not available for this bus.',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                              backgroundColor: Colors.red,
+                              duration: Duration(seconds: 3),
+                            ),
+                          );
+                        }
                       },
                       child: Text('Book My Seat'),
                     ),
