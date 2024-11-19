@@ -52,7 +52,7 @@ class MyApp extends StatelessWidget {
 // void main() async {
 //   WidgetsFlutterBinding.ensureInitialized(); // Ensures that Flutter bindings are initialized
 //   await Firebase.initializeApp(); // Initializes Firebase
-//   runApp( MyApp());
+//   runApp( MyApp());a
 // }
 //
 // class MyApp extends StatelessWidget {
