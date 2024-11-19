@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:test_4/addbusHalt.dart';
+import 'package:test_4/pages/Driver/MapSelection.dart';
 import 'package:test_4/pages/SelectCurrentAdmin.dart';
 
 class returnTrip extends StatefulWidget {
@@ -28,11 +29,15 @@ class _returnTripState extends State<returnTrip> {
   String? userID; // User ID from Firestore
   bool _isLoading = true; // Track loading state
   bool? _hasReturnTrip;
-  List<dynamic>? _seatLayout;  
-  int? _rows;   
-  int? _seatCount;  
+  List<dynamic>? _seatLayout;
+  int? _rows;
+  int? _seatCount;
   int? _selectedModel;
-  bool? bookingAvailable; 
+  bool? bookingAvailable;
+  String? numberPlate;
+  LatLng? sourceLatLng; // Store source location LatLng
+  LatLng? destinationLatLng; // Store destination location LatLng
+  String? ticketPrice; // Store ticket price
 
   @override
   void initState() {
@@ -55,9 +60,21 @@ class _returnTripState extends State<returnTrip> {
           busID = data['busID'];
           busName = data['busName'];
           routeNum = data['routeNum'];
+          numberPlate = data['numberPlate']; // Fetch numberPlate
+          ticketPrice = data['ticketPrice']; // Fetch ticketPrice
           // Swap source and destination locations
           sourceLocation = data['destinationLocation'];
           destinationLocation = data['sourceLocation'];
+          // Source and Destination LatLng
+          if (data['destinationLatLng'] != null) {
+            sourceLatLng = LatLng(data['destinationLatLng']['latitude'],
+                data['destinationLatLng']['longitude']);
+          }
+          if (data['sourceLatLng'] != null) {
+            destinationLatLng = LatLng(data['sourceLatLng']['latitude'],
+                data['sourceLatLng']['longitude']);
+          }
+
           userID = data['userID']; // Get the userID to submit later
           _selectedLocation =
               data['latitude'] != null && data['longitude'] != null
@@ -79,7 +96,6 @@ class _returnTripState extends State<returnTrip> {
           _rows = data['seatData']['rows'];
           _seatCount = data['seatData']['seatCount'];
           _selectedModel = data['seatData']['selectedModel'];
-
         });
       }
     } catch (e) {
@@ -114,10 +130,59 @@ class _returnTripState extends State<returnTrip> {
                           (value) => routeNum = value),
                       _buildTextFormField('Source Location', sourceLocation,
                           (value) => sourceLocation = value),
+                      // Button for changing the Source Location
+                      ElevatedButton(
+                        onPressed: () async {
+                          final result = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  GoogleMapPage(), // Navigate to GoogleMapPage
+                            ),
+                          );
+
+                          if (result != null) {
+                            setState(() {
+                              sourceLatLng = result; // Update source location
+                            });
+                          }
+                        },
+                        child: Text('Edit Source Location'),
+                      ),
+                      if (sourceLatLng != null)
+                        Text(
+                            'Source Location: Lat: ${sourceLatLng!.latitude}, Lng: ${sourceLatLng!.longitude}'),
                       _buildTextFormField(
                           'Destination Location',
                           destinationLocation,
                           (value) => destinationLocation = value),
+                      // Button for changing the Destination Location
+                      ElevatedButton(
+                        onPressed: () async {
+                          final result = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  GoogleMapPage(), // Navigate to GoogleMapPage
+                            ),
+                          );
+
+                          if (result != null) {
+                            setState(() {
+                              destinationLatLng =
+                                  result; // Update destination location
+                            });
+                          }
+                        },
+                        child: Text('Edit Destination Location'),
+                      ),
+                      if (destinationLatLng != null)
+                        Text(
+                            'Destination Location: Lat: ${destinationLatLng!.latitude}, Lng: ${destinationLatLng!.longitude}'),
+                      _buildTextFormField('Number Plate', numberPlate,
+                          (value) => numberPlate = value),
+                      _buildTextFormField('Ticket Price', ticketPrice,
+                          (value) => ticketPrice = value),
 
                       SizedBox(height: 20),
 
@@ -263,10 +328,20 @@ class _returnTripState extends State<returnTrip> {
         'busID': busID,
         'busName': busName,
         'routeNum': routeNum,
+        'numberPlate': numberPlate, // Include numberPlate
+        'ticketPrice': ticketPrice, // Include ticketPrice
         'sourceLocation': sourceLocation,
         'destinationLocation': destinationLocation,
         'latitude': _selectedLocation?.latitude,
         'longitude': _selectedLocation?.longitude,
+        'sourceLatLng': {
+          'latitude': sourceLatLng?.latitude,
+          'longitude': sourceLatLng?.longitude,
+        }, // Include sourceLatLng
+        'destinationLatLng': {
+          'latitude': destinationLatLng?.latitude,
+          'longitude': destinationLatLng?.longitude,
+        }, // Include destinationLatLng
         'busHalts': _busHalts,
         'isOnline': false,
         'timetable': _timetable, // Push timetable instead of timetableorg
