@@ -14,6 +14,9 @@ class AddBusPage extends StatefulWidget {
   final String sourceLocation;
   final String destinationLocation;
   final List<Map<String, String>> timetable_org;
+  final LatLng sourceLocationLatLng;
+  final LatLng destinationLocationLatLng;
+  final String numberPlate;
 
   AddBusPage({
     required this.userID,
@@ -22,6 +25,9 @@ class AddBusPage extends StatefulWidget {
     required this.routeNum,
     required this.sourceLocation,
     required this.destinationLocation,
+    required this.sourceLocationLatLng,
+    required this.destinationLocationLatLng,
+    required this.numberPlate,
     required this.timetable_org,
   });
 
@@ -30,6 +36,7 @@ class AddBusPage extends StatefulWidget {
 }
 
 class _AddBusPageState extends State<AddBusPage> {
+  String? ticketPrice; // New field for ticket price
   LatLng? _selectedLocation;
   List<Map<String, dynamic>> _busHalts = [];
   bool hasReturnTrip = false;
@@ -87,6 +94,21 @@ class _AddBusPageState extends State<AddBusPage> {
                   }
                 },
                 child: Text('Add Current Location of the Bus'),
+              ),
+              SizedBox(height: 20),
+              TextFormField(
+                decoration: InputDecoration(labelText: 'Ticket Price'),
+                keyboardType:
+                    TextInputType.number, // Ensure number input for the price
+                onSaved: (value) {
+                  ticketPrice = value;
+                },
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter the ticket price';
+                  }
+                  return null;
+                },
               ),
               SizedBox(height: 20),
               ElevatedButton(
@@ -265,6 +287,12 @@ class _AddBusPageState extends State<AddBusPage> {
   }
 
   void _submitBus() {
+
+    if (_seatData == null || _seatData?['seatLayout'] == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Please add seat data before submitting the bus.')),
+    );}
+
     List<Map<String, dynamic>>? flatSeatLayout =
         flattenSeatLayout(_seatData?['seatLayout']);
 
@@ -280,6 +308,16 @@ class _AddBusPageState extends State<AddBusPage> {
       'busHalts': _busHalts,
       'timetableorg': widget.timetable_org,
       'hasReturnTrip': hasReturnTrip,
+      'ticketPrice': ticketPrice, // Save ticket price to Firebase
+      'numberPlate': widget.numberPlate,
+      'sourceLatLng': {
+        'latitude': widget.sourceLocationLatLng.latitude,
+        'longitude': widget.sourceLocationLatLng.longitude,
+      },
+      'destinationLatLng': {
+        'latitude': widget.destinationLocationLatLng.latitude,
+        'longitude': widget.destinationLocationLatLng.longitude,
+      },
       'timetable': hasReturnTrip ? _timetable : [],
       'seatData': {
         'selectedModel': _seatData?['selectedModel'],
