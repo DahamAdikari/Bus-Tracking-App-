@@ -55,6 +55,7 @@ dependencies:
   google_place_plus: ^1.0.0
   flutter_stripe: ^11.0.0
   dio: ^5.6.0
+  uuid: ^4.5.1
 
 
 
