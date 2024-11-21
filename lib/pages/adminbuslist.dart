@@ -54,7 +54,7 @@ class _RegistrationListPageState extends State<RegistrationListPage> {
                 bool isAdded = data['isadd'] == true;
 
                 // Set color based on the isadd field
-                Color cardColor = isAdded ? Colors.green : Colors.red;
+                Color cardColor = isAdded ? Colors.blue.shade200 : Colors.red;
                 String statusText = isAdded ? 'Added' : 'Not Added';
 
                 return Card(

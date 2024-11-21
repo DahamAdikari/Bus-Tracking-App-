@@ -27,7 +27,7 @@ class _DisplaySeatsState extends State<DisplaySeats> {
   Future<void> _fetchSeatData() async {
     try {
       print("Fetching document with ID: ${widget.docID}");
-      
+
       // Fetch the seat data from the Firebase document
       DocumentSnapshot doc = await FirebaseFirestore.instance
           .collection('registration')
@@ -37,7 +37,7 @@ class _DisplaySeatsState extends State<DisplaySeats> {
       if (doc.exists && doc.data() != null) {
         var data = doc.data() as Map<String, dynamic>;
         print("Document data: $data");
-        
+
         setState(() {
           seatData = data['seatData'] ?? {}; // Ensure seatData is not null
           _isLoading = false; // Data fetched, stop loading
@@ -53,7 +53,8 @@ class _DisplaySeatsState extends State<DisplaySeats> {
 
   // Function to set layout based on seat model (stored as a number in Firebase)
   void _setLayoutBasedOnModel() {
-    int seatModel = seatData!['selectedModel']; // Fetch seat model as a number (e.g., 1, 2, 3)
+    int seatModel = seatData![
+        'selectedModel']; // Fetch seat model as a number (e.g., 1, 2, 3)
 
     switch (seatModel) {
       case 1: // 1 represents 1x2 model
@@ -138,7 +139,7 @@ class _DisplaySeatsState extends State<DisplaySeats> {
               children: [
                 Expanded(child: _buildSeatLayout()), // Build seat layout
                 _buildAdminControls(), // Add seat control buttons
-                _buildConfirmButton(), // Add confirm button
+                //_buildConfirmButton(), // Add confirm button
               ],
             ),
     );
@@ -199,33 +200,76 @@ class _DisplaySeatsState extends State<DisplaySeats> {
   Widget _buildAdminControls() {
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      child: Column(
+        crossAxisAlignment:
+            CrossAxisAlignment.stretch, // Aligns Confirm Button to full width
         children: [
-          ElevatedButton(
-            onPressed: () {
-              _updateSeatStatus('available'); // Change selected seats to available (green)
-            },
-            child: Text('Add Seats'),
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () {
+                    _updateSeatStatus(
+                        'available'); // Change selected seats to available (green)
+                  },
+                  //child: Text('Add Seats'),
+                  child: Text(
+                    'Add Seats',
+                    style: TextStyle(
+                      fontSize: 16, // Font size
+                      fontWeight: FontWeight.bold, // Font weight
+                      color: Colors.blue.shade900, // Text color
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    padding:
+                        EdgeInsets.symmetric(vertical: 16), // Uniform height
+                  ),
+                ),
+              ),
+              SizedBox(width: 8), // Adds spacing between the two buttons
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () {
+                    _updateSeatStatus(
+                        'empty'); // Change selected seats to empty (red)
+                  },
+                  //child: Text('Delete Seats'),
+                  child: Text(
+                    'Delete Seats',
+                    style: TextStyle(
+                      fontSize: 16, // Font size
+                      fontWeight: FontWeight.bold, // Font weight
+                      color: Colors.blue.shade900, // Text color
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    padding:
+                        EdgeInsets.symmetric(vertical: 16), // Uniform height
+                  ),
+                ),
+              ),
+            ],
           ),
+          SizedBox(
+              height:
+                  16), // Spacing between the admin controls and the confirm button
           ElevatedButton(
-            onPressed: () {
-              _updateSeatStatus('empty'); // Change selected seats to empty (red)
-            },
-            child: Text('Delete Seats'),
+            onPressed: _confirmSeats, // Navigate back and pass seat data
+            //child: Text('Confirm Seats'),
+            child: Text(
+              'Confirm Seats',
+              style: TextStyle(
+                fontSize: 16, // Font size
+                fontWeight: FontWeight.bold, // Font weight
+                color: Colors.blue.shade900, // Text color
+              ),
+            ),
+            style: ElevatedButton.styleFrom(
+              padding: EdgeInsets.symmetric(vertical: 16), // Uniform height
+            ),
           ),
         ],
-      ),
-    );
-  }
-
-  // Function to build confirm button
-  Widget _buildConfirmButton() {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: ElevatedButton(
-        onPressed: _confirmSeats, // Navigate back and pass seat data
-        child: Text('Confirm Seats'),
       ),
     );
   }
