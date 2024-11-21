@@ -143,7 +143,17 @@ class _AdminPageState extends State<AdminPage> {
                             });
                           }
                         },
-                        child: Text('Edit Source Location'),
+                        child: Text(
+                          'Edit Source Location',
+                          style: TextStyle(
+                            fontSize: 16, // Font size
+                            fontWeight: FontWeight.bold, // Font weight
+                            color: Colors.blue.shade900, // Text color
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          fixedSize: Size(300, 40),
+                        ),
                       ),
                       if (sourceLatLng != null)
                         Text(
@@ -171,7 +181,17 @@ class _AdminPageState extends State<AdminPage> {
                             });
                           }
                         },
-                        child: Text('Edit Destination Location'),
+                        child: Text(
+                          'Edit Destination Location',
+                          style: TextStyle(
+                            fontSize: 16, // Font size
+                            fontWeight: FontWeight.bold, // Font weight
+                            color: Colors.blue.shade900, // Text color
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          fixedSize: Size(300, 40),
+                        ),
                       ),
 
                       if (destinationLatLng != null)
@@ -234,7 +254,17 @@ class _AdminPageState extends State<AdminPage> {
                             });
                           }
                         },
-                        child: Text('Add Bus Halt'),
+                        child: Text(
+                          'Add Bus Halt',
+                          style: TextStyle(
+                            fontSize: 16, // Font size
+                            fontWeight: FontWeight.bold, // Font weight
+                            color: Colors.blue.shade900, // Text color
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          fixedSize: Size(300, 40),
+                        ),
                       ),
 
                       // Add Seats button
@@ -271,7 +301,17 @@ class _AdminPageState extends State<AdminPage> {
                             );
                           }
                         },
-                        child: Text('Add Seats'),
+                        child: Text(
+                          'Add Seats',
+                          style: TextStyle(
+                            fontSize: 16, // Font size
+                            fontWeight: FontWeight.bold, // Font weight
+                            color: Colors.blue.shade900, // Text color
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          fixedSize: Size(300, 40),
+                        ),
                       ),
 
                       // Add Current Location Button
@@ -298,7 +338,17 @@ class _AdminPageState extends State<AdminPage> {
                             );
                           }
                         },
-                        child: Text('Add Current Location of the Bus'),
+                        child: Text(
+                          'Add Current Location of the Bus',
+                          style: TextStyle(
+                            fontSize: 16, // Font size
+                            fontWeight: FontWeight.bold, // Font weight
+                            color: Colors.blue.shade900, // Text color
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          fixedSize: Size(300, 40),
+                        ),
                       ),
                       if (_selectedLocation != null)
                         Text(
@@ -316,7 +366,17 @@ class _AdminPageState extends State<AdminPage> {
                       // Add Bus Button
                       ElevatedButton(
                         onPressed: _submitForm,
-                        child: Text('Add Bus'),
+                        child: Text(
+                          'Add Bus',
+                          style: TextStyle(
+                            fontSize: 16, // Font size
+                            fontWeight: FontWeight.bold, // Font weight
+                            color: Colors.blue.shade900, // Text color
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          fixedSize: Size(300, 40),
+                        ),
                       ),
                     ],
                   ),
@@ -344,7 +404,18 @@ class _AdminPageState extends State<AdminPage> {
                 builder: (context) => returnTrip(busID: widget.docID)),
           );
         },
-        child: Text('Add the return bus'),
+        //child: Text('Add the return bus'),
+        child: Text(
+          'Add the return bus',
+          style: TextStyle(
+            fontSize: 16, // Font size
+            fontWeight: FontWeight.bold, // Font weight
+            color: Colors.blue.shade900, // Text color
+          ),
+        ),
+        style: ElevatedButton.styleFrom(
+          fixedSize: Size(300, 40),
+        ),
       );
     }
   }
