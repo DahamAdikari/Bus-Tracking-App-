@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:test_4/services/stripe_service.dart';
 import 'package:test_4/ticket_screen.dart';
+import 'package:test_4/auth/constants/colors.dart';
 
 class SeatBooking extends StatefulWidget {
   final String busId;
@@ -231,7 +232,15 @@ Widget _buildBookButton() {
         print("No seats selected.");
       }
     },
-    child: Text('Book Selected Seats'),
+    //child: Text('Book Selected Seats'),
+    style: ElevatedButton.styleFrom(
+      backgroundColor: Color(0xFF000080)),
+    child: Text(
+      'Book Selected Seats',
+      style: TextStyle(
+        color: Colors.white,
+      ),
+    ),
   );
 }
 
@@ -296,13 +305,27 @@ Widget _buildShowTicketsButton() {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // appBar: AppBar(
+      //   title: Text('Seat Booking'),
+      // ),
       appBar: AppBar(
-        title: Text('Seat Booking'),
+        title: Text(
+          'Seat Booking',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: tWhiteColor,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: tPrimaryColor,
+        iconTheme: IconThemeData(color: Colors.white),
+        elevation: 4,
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator()) // Show loading indicator
           : Column(
               children: [
+                SizedBox(height: 16.0),
                 Expanded(child: _buildSeatLayout()), // Show seat layout
                 Padding(
                   padding: const EdgeInsets.all(8.0),
