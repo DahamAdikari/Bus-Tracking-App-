@@ -17,6 +17,7 @@ class AddBusPage extends StatefulWidget {
   final LatLng sourceLocationLatLng;
   final LatLng destinationLocationLatLng;
   final String numberPlate;
+  final String contactNumber;
 
   AddBusPage({
     required this.userID,
@@ -29,6 +30,7 @@ class AddBusPage extends StatefulWidget {
     required this.destinationLocationLatLng,
     required this.numberPlate,
     required this.timetable_org,
+    required this.contactNumber,
   });
 
   @override
@@ -42,12 +44,17 @@ class _AddBusPageState extends State<AddBusPage> {
   bool hasReturnTrip = false;
   List<Map<String, dynamic>> _timetable = [];
   Map<String, dynamic>? _seatData;
+  String? contactNumber; 
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Bus Stops and Location'),
+        backgroundColor: Color(0xFF000080),
+        title: Text('Add Bus Stops and Location',
+            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+        iconTheme: IconThemeData(color: Colors.white),
+        elevation: 0,
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -75,7 +82,17 @@ class _AddBusPageState extends State<AddBusPage> {
                     });
                   }
                 },
-                child: Text('Add Bus Halt'),
+                child: Text(
+                  'Add Bus Halt',
+                    style: TextStyle(
+                      fontSize: 16, // Font size
+                      fontWeight: FontWeight.bold, // Font weight
+                      color: Colors.blue.shade900, // Text color
+                    ),
+                  ),
+                style: ElevatedButton.styleFrom(
+                  fixedSize: Size(300, 40),
+                ),
               ),
               SizedBox(height: 20),
               ElevatedButton(
@@ -93,7 +110,18 @@ class _AddBusPageState extends State<AddBusPage> {
                     });
                   }
                 },
-                child: Text('Add Current Location of the Bus'),
+                //child: Text('Add Current Location of the Bus'),
+                child: Text(
+                  'Add Current Location of the Bus',
+                    style: TextStyle(
+                      fontSize: 16, // Font size
+                      fontWeight: FontWeight.bold, // Font weight
+                      color: Colors.blue.shade900, // Text color
+                    ),
+                  ),
+                style: ElevatedButton.styleFrom(
+                  fixedSize: Size(300, 40),
+                ),
               ),
               SizedBox(height: 20),
               TextFormField(
@@ -126,7 +154,17 @@ class _AddBusPageState extends State<AddBusPage> {
                     });
                   }
                 },
-                child: Text('Add Seats'),
+                child: Text(
+                  'Add Seats',
+                  style: TextStyle(
+                    fontSize: 16, // Font size
+                    fontWeight: FontWeight.bold, // Font weight
+                    color: Colors.blue.shade900, // Text color
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  fixedSize: Size(300, 40),
+                ),
               ),
               if (_selectedLocation != null)
                 Text(
@@ -159,7 +197,17 @@ class _AddBusPageState extends State<AddBusPage> {
                 SizedBox(height: 10),
                 ElevatedButton(
                   onPressed: _addTimetableRow,
-                  child: Text('Add Timetable Row'),
+                  child: Text(
+                  'Add Timetable Row',
+                    style: TextStyle(
+                      fontSize: 16, // Font size
+                      fontWeight: FontWeight.bold, // Font weight
+                      color: Colors.blue.shade900, // Text color
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    fixedSize: Size(300, 40),
+                  ),
                 ),
               ],
               SizedBox(height: 20),
@@ -181,7 +229,18 @@ class _AddBusPageState extends State<AddBusPage> {
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _submitBus,
-                child: Text('Add Bus'),
+                child: Text(
+                  'Add Bus',
+                    style: TextStyle(
+                      fontSize: 16, // Font size
+                      fontWeight: FontWeight.bold, // Font weight
+                      color: Colors.white, // Text color
+                    ),
+                  ),
+                style: ElevatedButton.styleFrom(
+                  fixedSize: Size(300, 40),
+                  backgroundColor: Colors.blue.shade900,
+                ),
               ),
             ],
           ),
@@ -310,6 +369,7 @@ class _AddBusPageState extends State<AddBusPage> {
       'hasReturnTrip': hasReturnTrip,
       'ticketPrice': ticketPrice, // Save ticket price to Firebase
       'numberPlate': widget.numberPlate,
+      'contactNumber': widget.contactNumber,
       'sourceLatLng': {
         'latitude': widget.sourceLocationLatLng.latitude,
         'longitude': widget.sourceLocationLatLng.longitude,

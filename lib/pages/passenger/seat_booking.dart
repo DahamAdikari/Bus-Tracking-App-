@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:test_4/services/stripe_service.dart';
 import 'package:test_4/ticket_screen.dart';
+import 'package:test_4/auth/constants/colors.dart';
 
 class SeatBooking extends StatefulWidget {
   final String busId;
@@ -14,7 +15,7 @@ class SeatBooking extends StatefulWidget {
 }
 
 class _SeatBookingState extends State<SeatBooking> {
-  Map<String, dynamic>? seatData;
+  Map<String, dynamic>? seatData, source, destination;
   bool _isLoading = true; // For tracking data loading
   int _crossAxisCount = 4; // Default seat layout columns
   double _crossAxisSpacing = 10.0; // Default cross-axis spacing
@@ -45,6 +46,8 @@ class _SeatBookingState extends State<SeatBooking> {
         var data = doc.data() as Map<String, dynamic>;
         setState(() {
           seatData = data['seatData']; // Ensure seat data is not null
+          source = {'locationName': data['sourceLocation']}; // Add source
+          destination = {'locationName': data['destinationLocation']}; // Add destination
           _setLayoutBasedOnModel(); // Adjust seat layout based on model
           _isLoading = false; // Stop loading after data is fetched
         });
@@ -94,8 +97,14 @@ class _SeatBookingState extends State<SeatBooking> {
       setState(() {
         if (_selectedSeats.contains(index)) {
           _selectedSeats.remove(index); // Deselect if already selected
+          _selectedSeatInfo.removeWhere((seatInfo) =>
+          seatInfo['row'] == seat['row'] && seatInfo['col'] == seat['col']); // Remove from selected info
         } else {
           _selectedSeats.add(index); // Select seat
+          _selectedSeatInfo.add({
+          'row': seat['row'],
+          'col': seat['col'],
+        }); // Add seat info
         }
       });
     } else {
@@ -164,67 +173,159 @@ class _SeatBookingState extends State<SeatBooking> {
     );
   }
 
-  // Build the booking button
-  Widget _buildBookButton() {
-    return ElevatedButton(
-      onPressed: () {
-        int seatCount = _selectedSeats.length;
-        //StripeService.instance.makePayment();
-        // Code to handle booking logic here
-        // can use the _selectedSeats to update Firestore
-        if (seatCount > 0) {
-          StripeService.instance.makePayment(
-              seatCount, widget.busId, _selectedSeats, widget.driverId);
-          setState(() {
-            _paymentSuccess = true; // Update payment status
+/*
+Widget _buildBookButton() {
+  return ElevatedButton(
+    onPressed: () {
+      int seatCount = _selectedSeats.length;
+      if (seatCount > 0) {
+        // Start the payment process
+        StripeService.instance.makePayment(
+            seatCount, widget.busId, _selectedSeats, widget.driverId)
+          .then((_) {
+            // If payment was successful, update payment status
+            setState(() {
+              _paymentSuccess = true; // Update payment status after success
+            });
+          }).catchError((e) {
+            // If there was an error, ensure payment success is false
+            setState(() {
+              _paymentSuccess = false;
+            });
+            print("Payment failed: $e");
           });
-        } else {
-          print("No seats selected.");
-        }
-      },
-      child: Text('Book Selected Seats'),
-    );
-  }
+      } else {
+        print("No seats selected.");
+      }
+    },
+    child: Text('Book Selected Seats'),
+  );
+}*/
 
-  // Build the button to show tickets
+Widget _buildBookButton() {
+  return ElevatedButton(
+    onPressed: () {
+      int seatCount = _selectedSeats.length;
+      if (seatCount > 0) {
+        // Start the payment process
+        StripeService.instance.makePayment(
+            seatCount, widget.busId, _selectedSeats, widget.driverId)
+          .then((paymentSuccess) {
+            if (paymentSuccess) {
+              // If payment was successful, update payment status
+              setState(() {
+                _paymentSuccess = true; // Show "Show Tickets" button
+              });
+            } else {
+              setState(() {
+                _paymentSuccess = false; // Ensure the button doesn't show
+              });
+              print("Payment failed.");
+            }
+          }).catchError((e) {
+            setState(() {
+              _paymentSuccess = false; // Ensure payment failure case
+            });
+            print("Payment failed: $e");
+          });
+      } else {
+        print("No seats selected.");
+      }
+    },
+    //child: Text('Book Selected Seats'),
+    style: ElevatedButton.styleFrom(
+      backgroundColor: Color(0xFF000080)),
+    child: Text(
+      'Book Selected Seats',
+      style: TextStyle(
+        color: Colors.white,
+      ),
+    ),
+  );
+}
+
+
+/*
+
   Widget _buildShowTicketsButton() {
-    return ElevatedButton(
-      onPressed: () {
-        // Navigate to the ticket display page with seatCount (number of selected seats)
-        /*Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const TicketScreen()
-        ),
-        );
-        print("Show Tickets pressed");*/
+  return ElevatedButton(
+    onPressed: () {
+      if (_paymentSuccess) { // Show tickets only if payment was successful
         int seatCount = _selectedSeats.length;
-        if (seatCount > 0) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) =>
-                  TicketScreen(seatCount: seatCount), // Pass the seat count
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => TicketScreen(
+              seatCount: seatCount,
+              sourceLocation: source?['locationName'] ?? 'Unknown',
+              destinationLocation: destination?['locationName'] ?? 'Unknown',
+              selectedSeats: _selectedSeatInfo,
             ),
-          );
-          print("Show Tickets pressed");
-        } else {
-          print("No seats selected.");
-        }
-      },
-      child: Text('Show Tickets'),
-    );
-  }
+          ),
+        );
+        print("Show Tickets pressed");
+      } else {
+        print("Payment was not successful, cannot show tickets.");
+      }
+    },
+    child: Text('Show Tickets'),
+  );
+}*/
+
+
+
+Widget _buildShowTicketsButton() {
+  return ElevatedButton(
+    onPressed: () {
+      if (_paymentSuccess) { // Show tickets only if payment was successful
+        int seatCount = _selectedSeats.length;
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => TicketScreen(
+              seatCount: seatCount,
+              sourceLocation: source?['locationName'] ?? 'Unknown',
+              destinationLocation: destination?['locationName'] ?? 'Unknown',
+              selectedSeats: _selectedSeatInfo,
+            ),
+          ),
+        );
+        print("Show Tickets pressed");
+      } else {
+        print("Payment was not successful, cannot show tickets.");
+      }
+    },
+    child: Text('Show Tickets'),
+  );
+}
+
+
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // appBar: AppBar(
+      //   title: Text('Seat Booking'),
+      // ),
       appBar: AppBar(
-        title: Text('Seat Booking'),
+        title: Text(
+          'Seat Booking',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: tWhiteColor,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: tPrimaryColor,
+        iconTheme: IconThemeData(color: Colors.white),
+        elevation: 4,
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator()) // Show loading indicator
           : Column(
               children: [
+                SizedBox(height: 16.0),
                 Expanded(child: _buildSeatLayout()), // Show seat layout
                 Padding(
                   padding: const EdgeInsets.all(8.0),

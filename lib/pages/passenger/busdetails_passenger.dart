@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:test_4/auth/constants/colors.dart';
+import 'package:test_4/pages/Useless/busruteAdmin.dart';
 import 'package:test_4/pages/passenger/busmap_passenger.dart';
 import 'package:test_4/pages/passenger/seat_booking.dart';
 
@@ -389,6 +390,27 @@ class _BusDetailsPagePassengerState extends State<BusDetailsPagePassenger> {
                     ),
                   ],
                 ),
+                // ElevatedButton.icon(
+                //   onPressed: () {
+                //     Navigator.push(
+                //       context,
+                //       MaterialPageRoute(
+                //         builder: (context) => AdminRouteCreationPage(
+                //           busId: '',
+                //         ),
+                //       ),
+                //     );
+                //   },
+                //   icon: Icon(Icons.map, size: 20, color: tWhiteColor),
+                //   label: Text('test', style: TextStyle(color: tWhiteColor)),
+                //   style: ElevatedButton.styleFrom(
+                //     backgroundColor: tPrimaryColor,
+                //     padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                //     shape: RoundedRectangleBorder(
+                //       borderRadius: BorderRadius.circular(8),
+                //     ),
+                //   ),
+                // ),
               ],
             ),
           );
