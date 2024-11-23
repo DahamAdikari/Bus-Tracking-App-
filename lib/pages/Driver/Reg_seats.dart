@@ -145,7 +145,11 @@ class _RegSeatsState extends State<RegSeats> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Seats'),
+        backgroundColor: Color(0xFF000080),
+        title: Text('Add Seats',
+            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+        iconTheme: IconThemeData(color: Colors.white),
+        elevation: 0,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -182,24 +186,50 @@ class _RegSeatsState extends State<RegSeats> {
               },
             ),
             SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: createSeatLayout,
-              child: Text('Check Seat Layout'),
+            Center(
+              child: ElevatedButton(
+                onPressed: createSeatLayout,
+                //child: Text('Check Seat Layout'),
+                child: Text(
+                  'Check Seat Layout',
+                    style: TextStyle(
+                      fontSize: 16, // Font size
+                      fontWeight: FontWeight.bold, // Font weight
+                      color: Colors.blue.shade900, // Text color
+                    ),
+                  ),
+                style: ElevatedButton.styleFrom(
+                  fixedSize: Size(300, 40),
+                ),
+              ),
             ),
             SizedBox(height: 20),
             buildSeatLayout(),
             SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                // Pass data back to AddBusPage when confirming the layout
-                Navigator.pop(context, {
-                  'selectedModel': selectedModel,
-                  'rows': rows,
-                  'seatCount': seatCount,
-                  'seatLayout': seatLayout,
-                });
-              },
-              child: Text('Confirm seats order'),
+            Center(
+              child: ElevatedButton(
+                onPressed: () {
+                  // Pass data back to AddBusPage when confirming the layout
+                  Navigator.pop(context, {
+                    'selectedModel': selectedModel,
+                    'rows': rows,
+                    'seatCount': seatCount,
+                    'seatLayout': seatLayout,
+                  });
+                },
+                child: Text(
+                    'Confirm seats order',
+                      style: TextStyle(
+                        fontSize: 16, // Font size
+                        fontWeight: FontWeight.bold, // Font weight
+                        color: Colors.white, // Text color
+                      ),
+                    ),
+                  style: ElevatedButton.styleFrom(
+                    fixedSize: Size(300, 40),
+                    backgroundColor: Colors.blue.shade900,
+                  ),
+              ),
             ),
           ],
         ),

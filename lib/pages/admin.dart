@@ -7,6 +7,7 @@ import 'package:test_4/pages/SelectCurrentAdmin.dart';
 import 'package:test_4/pages/Useless/SeatLayoutDriver.dart';
 import 'package:test_4/pages/Useless/adminreturntrip.dart';
 import 'package:test_4/pages/displaySeats.dart';
+import 'package:test_4/pages/Useless/busruteAdmin.dart';
 
 class AdminPage extends StatefulWidget {
   final String? docID; // Receive the document ID from RegistrationListPage
@@ -39,6 +40,7 @@ class _AdminPageState extends State<AdminPage> {
   LatLng? sourceLatLng; // Store source location LatLng
   LatLng? destinationLatLng; // Store destination location LatLng
   String? ticketPrice; // Store ticket price
+  String? contactNumber;
 
   @override
   void initState() {
@@ -66,6 +68,7 @@ class _AdminPageState extends State<AdminPage> {
           userID = data['userID']; // Get the userID to submit later
           numberPlate = data['numberPlate']; // Fetch numberPlate
           ticketPrice = data['ticketPrice']; // Fetch ticketPrice
+          contactNumber = data['contactNumber'];
 
           // Source and Destination LatLng
           if (data['sourceLatLng'] != null) {
@@ -107,7 +110,11 @@ class _AdminPageState extends State<AdminPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Bus Details'),
+        backgroundColor: Colors.blue,
+        title: Text('Add Bus Details',
+            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+        iconTheme: IconThemeData(color: Colors.white),
+        elevation: 0,
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator()) // Show loading spinner
@@ -203,6 +210,9 @@ class _AdminPageState extends State<AdminPage> {
                       _buildTextFormField('Ticket Price', ticketPrice,
                           (value) => ticketPrice = value),
 
+                      _buildTextFormField('Contact Number', contactNumber,
+                          (value) => contactNumber = value,),
+
                       SizedBox(height: 20),
 
                       // Directly display the fetched timetable
@@ -256,6 +266,30 @@ class _AdminPageState extends State<AdminPage> {
                         },
                         child: Text(
                           'Add Bus Halt',
+                          style: TextStyle(
+                            fontSize: 16, // Font size
+                            fontWeight: FontWeight.bold, // Font weight
+                            color: Colors.blue.shade900, // Text color
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          fixedSize: Size(300, 40),
+                        ),
+                      ),
+
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => AdminRouteCreationPage(
+                                busId: '',
+                              ),
+                            ),
+                          );
+                        },
+                        child: Text(
+                          'Create Route',
                           style: TextStyle(
                             fontSize: 16, // Font size
                             fontWeight: FontWeight.bold, // Font weight
@@ -368,14 +402,15 @@ class _AdminPageState extends State<AdminPage> {
                         onPressed: _submitForm,
                         child: Text(
                           'Add Bus',
-                          style: TextStyle(
-                            fontSize: 16, // Font size
-                            fontWeight: FontWeight.bold, // Font weight
-                            color: Colors.blue.shade900, // Text color
+                            style: TextStyle(
+                              fontSize: 16, // Font size
+                              fontWeight: FontWeight.bold, // Font weight
+                              color: Colors.white, // Text color
+                            ),
                           ),
-                        ),
                         style: ElevatedButton.styleFrom(
                           fixedSize: Size(300, 40),
+                          backgroundColor: Colors.blue.shade900,
                         ),
                       ),
                     ],
@@ -407,14 +442,15 @@ class _AdminPageState extends State<AdminPage> {
         //child: Text('Add the return bus'),
         child: Text(
           'Add the return bus',
-          style: TextStyle(
+            style: TextStyle(
             fontSize: 16, // Font size
             fontWeight: FontWeight.bold, // Font weight
-            color: Colors.blue.shade900, // Text color
-          ),
+            color: Colors.white, // Text color
+            ),
         ),
         style: ElevatedButton.styleFrom(
-          fixedSize: Size(300, 40),
+        fixedSize: Size(300, 40),
+        backgroundColor: Colors.blue,
         ),
       );
     }
@@ -474,6 +510,7 @@ class _AdminPageState extends State<AdminPage> {
         'destinationLocation': destinationLocation,
         'numberPlate': numberPlate, // Include numberPlate
         'ticketPrice': ticketPrice, // Include ticketPrice
+        'contactNumber': contactNumber, 
         'latitude': _selectedLocation?.latitude,
         'longitude': _selectedLocation?.longitude,
         'busHalts': _busHalts,
