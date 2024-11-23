@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:location/location.dart';
+import 'package:test_4/auth/constants/colors.dart';
 import 'package:test_4/pages/Driver/busmap_driver.dart';
 import 'package:test_4/pages/Driver/editbusdetails_driver.dart';
 
@@ -171,20 +172,21 @@ class _BusDetailsPageState extends State<BusDetailsPage> {
   }
 
   Future<void> _updateBookingAvailability(bool status) async {
-  try {
-    await FirebaseFirestore.instance
-        .collection('driver')
-        .doc(widget.userID)
-        .collection('buses')
-        .doc(widget.busId)
-        .update({
-      'bookingAvailable': status, // Update booking availability field in Firestore
-    });
-    print("Booking availability updated to $status");
-  } catch (e) {
-    print("Error updating booking availability: $e");
+    try {
+      await FirebaseFirestore.instance
+          .collection('driver')
+          .doc(widget.userID)
+          .collection('buses')
+          .doc(widget.busId)
+          .update({
+        'bookingAvailable':
+            status, // Update booking availability field in Firestore
+      });
+      print("Booking availability updated to $status");
+    } catch (e) {
+      print("Error updating booking availability: $e");
+    }
   }
-}
 
   Future<void> _updateReturnTripBusLocation(
       double latitude, double longitude) async {
@@ -393,11 +395,18 @@ class _BusDetailsPageState extends State<BusDetailsPage> {
       onWillPop: _onWillPop,
       child: Scaffold(
         appBar: AppBar(
-          backgroundColor: isOnline ? Colors.green : Colors.red,
+          backgroundColor: isOnline ? Colors.green : Color(0xFF000080),
+          iconTheme: IconThemeData(color: Colors.white),
           title: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Bus Details'),
+              Text(
+                'Bus Details',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: tWhiteColor,
+                ),
+              ),
               IconButton(
                 icon: Icon(Icons.refresh),
                 onPressed: _loadBusData,
@@ -416,8 +425,8 @@ class _BusDetailsPageState extends State<BusDetailsPage> {
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  backgroundColor: Colors.lightBlue,
+                  foregroundColor: Color(0xFF000080),
+                  backgroundColor: Colors.white,
                 ),
                 child: Text('Edit'),
               ),
@@ -431,33 +440,142 @@ class _BusDetailsPageState extends State<BusDetailsPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Bus Name: ${busData!['busName']}',
-                        style: TextStyle(fontSize: 18)),
+                    // Text('Bus Name: ${busData!['busName']}',
+                    //     style: TextStyle(fontSize: 18)),
+                    // SizedBox(height: 10),
+                    // Text('Route Number: ${busData!['routeNum']}',
+                    //     style: TextStyle(fontSize: 18)),
+                    // SizedBox(height: 10),
+                    // Text('Source Location: $sourceLocation',
+                    //     style: TextStyle(fontSize: 18)),
+                    // SizedBox(height: 10),
+                    // Text('Destination Location: $destinationLocation',
+                    //     style: TextStyle(fontSize: 18)),
+                    // SizedBox(height: 20),
+                    // Text('Bus Halts:', style: TextStyle(fontSize: 18)),
+                    // SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Icon(Icons.directions_bus,
+                            color: Color(0xFF000080), size: 24),
+                        SizedBox(width: 10),
+                        Text(
+                          'Bus Name: ${busData!['busName']}',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF000080), // Navy Blue
+                          ),
+                        ),
+                      ],
+                    ),
                     SizedBox(height: 10),
-                    Text('Route Number: ${busData!['routeNum']}',
-                        style: TextStyle(fontSize: 18)),
+
+                    // Route Number
+                    Row(
+                      children: [
+                        Icon(Icons.route, color: Color(0xFF00FFFF), size: 24),
+                        SizedBox(width: 10),
+                        Text(
+                          'Route Number: ${busData!['routeNum']}',
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Color(0xFF0000FF), // Blue
+                          ),
+                        ),
+                      ],
+                    ),
                     SizedBox(height: 10),
-                    Text('Source Location: $sourceLocation',
-                        style: TextStyle(fontSize: 18)),
+
+                    // Source Location
+                    Row(
+                      children: [
+                        Icon(Icons.location_on,
+                            color: Color(0xFF000080), size: 24),
+                        SizedBox(width: 10),
+                        Text(
+                          'Source Location: $sourceLocation',
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Color(0xFF000000), // Black
+                          ),
+                        ),
+                      ],
+                    ),
                     SizedBox(height: 10),
-                    Text('Destination Location: $destinationLocation',
-                        style: TextStyle(fontSize: 18)),
-                    SizedBox(height: 20),
-                    Text('Bus Halts:', style: TextStyle(fontSize: 18)),
-                    SizedBox(height: 10),
-                    Container(
-                      height: 200,
-                      child: ListView.builder(
-                        itemCount: busData!['busHalts']?.length ?? 0,
-                        itemBuilder: (context, index) {
-                          return ListTile(
-                            title: Text(busData!['busHalts'][index]['name']),
-                          );
-                        },
-                      ),
+
+                    // Destination Location
+                    Row(
+                      children: [
+                        Icon(Icons.location_on,
+                            color: Color(0xFF00FFFF), size: 24),
+                        SizedBox(width: 10),
+                        Text(
+                          'Destination Location: $destinationLocation',
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Color(0xFF000000), // Black
+                          ),
+                        ),
+                      ],
                     ),
                     SizedBox(height: 20),
+                    // Container(
+                    //   height: 200,
+                    //   child: ListView.builder(
+                    //     itemCount: busData!['busHalts']?.length ?? 0,
+                    //     itemBuilder: (context, index) {
+                    //       return ListTile(
+                    //         title: Text(busData!['busHalts'][index]['name']),
+                    //       );
+                    //     },
+                    //   ),
+                    // ),
+                    // SizedBox(height: 20),
+                    Text(
+                      'Bus Halts:',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF000080), // Navy Blue
+                      ),
+                    ),
+                    SizedBox(height: 10),
 
+                    // List of Bus Halts
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Color(0xFFE0FFFF), // Light Cyan
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: EdgeInsets.all(8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: (busData!['busHalts'] ?? [])
+                            .map<Widget>(
+                              (halt) => Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 4.0),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.stop_circle,
+                                        color: Color(0xFF000080)),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      halt['name'] ?? 'Unknown Halt',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: Color(0xFF000000), // Black
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            )
+                            .toList(),
+                      ),
+                    ),
+                    SizedBox(height: 50),
                     // Display the timetable for return trip
                     _timetable.isNotEmpty
                         ? Column(
@@ -465,7 +583,11 @@ class _BusDetailsPageState extends State<BusDetailsPage> {
                             children: [
                               Text(
                                 'Timetable:',
-                                style: TextStyle(fontWeight: FontWeight.bold),
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF000080), // Navy Blue
+                                ),
                               ),
                               ..._timetable.map((entry) {
                                 return Row(
@@ -473,95 +595,33 @@ class _BusDetailsPageState extends State<BusDetailsPage> {
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
-                                        'Departure: ${entry['departureTime'] ?? ''}'),
+                                        'Departure: ${entry['departureTime'] ?? ''}',
+                                        style: TextStyle(
+                                            fontSize: 16,
+                                            color: Color(0xFF000000))),
                                     Text(
-                                        'Arrival: ${entry['arrivalTime'] ?? ''}'),
+                                        'Arrival: ${entry['arrivalTime'] ?? ''}',
+                                        style: TextStyle(
+                                            fontSize: 16,
+                                            color: Color(0xFF000000))),
                                   ],
                                 );
                               }).toList(),
                             ],
                           )
-                        : Text('No timetable available'),
+                        : Text('No timetable available',
+                            style: TextStyle(
+                                fontSize: 18, color: Color(0xFF000000))),
 
-                    SizedBox(height: 10),
-                    if (isOnline)
-                      Container(
-                        padding: EdgeInsets.all(10.0),
-                        decoration: BoxDecoration(
-                          color: Colors.green[100],
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        child: Text(
-                          'You are Online, Your bus is tracking to passengers',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.green[800],
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => BusLocationMapPage(
-                              busId: widget.busId,
-                              userID: widget.userID,
-                            ),
-                          ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        backgroundColor: Colors.lightBlue,
-                      ),
-                      child: Text('View on Google Maps'),
-                    ),
-
-                    // "Go online" toggle button
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        // "Go online" toggle button
-                        ElevatedButton(
-                          onPressed: _toggleOnlineStatus,
-                          style: ElevatedButton.styleFrom(
-                            foregroundColor: Colors.white,
-                            backgroundColor: isOnline ? Colors.red : Colors.green,
-                          ),
-                          child: Text(isOnline ? 'Go Offline' : 'Go Online'),
-                        ),
-                        // "View Seats" button
-                        ElevatedButton(
-                            onPressed: () {
-                              setState(() {
-                                showSeatLayout = !showSeatLayout;
-                                if (showSeatLayout) {
-                                  _fetchSeatData();
-                                }
-                              });
-                            },
-                            style: ElevatedButton.styleFrom(
-                              foregroundColor: Colors.white,
-                              backgroundColor: Colors.orange,
-                            ),
-                            child: Text(
-                                showSeatLayout ? 'Hide Seats' : 'View Seats'),
-                          ),
-                      ],
-                    ),
-                    SizedBox(height: 10),
-
-                    // Return Trip toggle
+                    SizedBox(height: 20),
                     if (hasReturnTrip)
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
                             'Return Trip',
-                            style: TextStyle(fontSize: 18),
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.w600),
                           ),
                           Switch(
                             value: isReturnTripActive,
@@ -588,13 +648,16 @@ class _BusDetailsPageState extends State<BusDetailsPage> {
                         ],
                       ),
 
+                    // "Go online" toggle button
+
                     // Booking Available toggle button
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
                           'Seat Booking Available',
-                          style: TextStyle(fontSize: 18),
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.w600),
                         ),
                         Switch(
                           value: isBookingAvailable,
@@ -604,10 +667,170 @@ class _BusDetailsPageState extends State<BusDetailsPage> {
                             });
 
                             // Update the booking availability status in Firestore
-                            await _updateBookingAvailability(isBookingAvailable);
+                            await _updateBookingAvailability(
+                                isBookingAvailable);
                           },
                         ),
                       ],
+                    ),
+                    if (isOnline)
+                      Container(
+                        padding: EdgeInsets.all(10.0),
+                        decoration: BoxDecoration(
+                          color: Colors.green[100],
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        child: Text(
+                          'You are Online, Your bus is tracking to passengers',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.green[800],
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    SizedBox(
+                      height: 25,
+                    ),
+                    // Column(
+
+                    //   mainAxisAlignment: MainAxisAlignment
+                    //       .center, // Centers the content vertically
+                    //   // Centers the content horizontally
+                    //   // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    //   children: [
+
+                    //     // "Go online" toggle button
+                    //     ElevatedButton(
+
+                    //       onPressed: _toggleOnlineStatus,
+                    //       style: ElevatedButton.styleFrom(
+                    //         foregroundColor: Colors.white,
+                    //         backgroundColor:
+                    //             isOnline ? Colors.red : Colors.green,
+                    //       ),
+                    //       child: Text(isOnline ? 'Go Offline' : 'Go Online'),
+                    //     ),
+                    //     // "View Seats" button
+                    //     ElevatedButton(
+                    //       onPressed: () {
+                    //         setState(() {
+                    //           showSeatLayout = !showSeatLayout;
+                    //           if (showSeatLayout) {
+                    //             _fetchSeatData();
+                    //           }
+                    //         });
+                    //       },
+                    //       style: ElevatedButton.styleFrom(
+                    //         foregroundColor: Colors.white,
+                    //         backgroundColor: Color(0xFF000080),
+                    //       ),
+                    //       child: Text(
+                    //           showSeatLayout ? 'Hide Seats' : 'View Seats'),
+                    //     ),
+                    //   ],
+                    // ),
+                    Column(
+                      mainAxisAlignment:
+                          MainAxisAlignment.center, // Center vertically
+                      children: [
+                        // "Go online" toggle button - expands horizontally
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 30.0), // Add padding to control width
+                          width: double
+                              .infinity, // Make button expand horizontally
+                          child: ElevatedButton(
+                            onPressed: _toggleOnlineStatus,
+                            style: ElevatedButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              backgroundColor:
+                                  isOnline ? Colors.red : Colors.green,
+                            ),
+                            child: Text(isOnline ? 'Go Offline' : 'Go Online'),
+                          ),
+                        ),
+                        SizedBox(height: 10), // Adds space between buttons
+                        // "View Seats" button - expands horizontally
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 30.0), // Add padding to control width
+                          width: double
+                              .infinity, // Make button expand horizontally
+                          child: ElevatedButton(
+                            onPressed: () {
+                              setState(() {
+                                showSeatLayout = !showSeatLayout;
+                                if (showSeatLayout) {
+                                  _fetchSeatData();
+                                }
+                              });
+                            },
+                            style: ElevatedButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              backgroundColor: Color(0xFF000080),
+                            ),
+                            child: Text(
+                                showSeatLayout ? 'Hide Seats' : 'View Seats'),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    SizedBox(height: 10),
+
+                    // Return Trip toggle
+
+                    // ElevatedButton(
+                    //   onPressed: () {
+                    //     Navigator.push(
+                    //       context,
+                    //       MaterialPageRoute(
+                    //         builder: (context) => BusLocationMapPage(
+                    //           busId: widget.busId,
+                    //           userID: widget.userID,
+                    //         ),
+                    //       ),
+                    //     );
+                    //   },
+                    //   style: ElevatedButton.styleFrom(
+                    //     foregroundColor: Colors.white,
+                    //     backgroundColor: Color(0xFF000080),
+                    //     padding:
+                    //         EdgeInsets.symmetric(vertical: 13, horizontal: 110),
+                    //   ),
+                    //   child: Text('View on Google Maps'),
+                    // ),
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 30.0), // Add padding to control width
+                      width: double.infinity, // Make button expand horizontally
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => BusLocationMapPage(
+                                busId: widget.busId,
+                                userID: widget.userID,
+                              ),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          backgroundColor: Color(0xFF000080),
+                          padding: EdgeInsets.symmetric(
+                              vertical: 13,
+                              horizontal:
+                                  0), // Vertical padding remains, horizontal is adjusted for full width
+                        ),
+                        child: Text('View on Google Maps'),
+                      ),
+                    ),
+
+                    SizedBox(
+                      height: 20,
                     ),
 
                     // Display the seat layout if showSeatLayout is true

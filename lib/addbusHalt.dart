@@ -41,7 +41,17 @@ class _AddBusHaltPageState extends State<AddBusHaltPage> {
                 SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: _selectLocation,
-                  child: Text('Select the location in the map'),
+                  child: Text(
+                    'Select the location in the map',
+                    style: TextStyle(
+                    fontSize: 16, // Font size
+                    fontWeight: FontWeight.bold, // Font weight
+                    color: Colors.blue.shade900, // Text color
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                  fixedSize: Size(300, 40),
+                  ),
                 ),
                 if (_locationName != null) ...[
                   SizedBox(height: 20),
@@ -53,7 +63,13 @@ class _AddBusHaltPageState extends State<AddBusHaltPage> {
                 SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: _submitHalt,
-                  child: Text('Add Bus Halt'),
+                  child: Text('Add Bus Halt',
+                  style: TextStyle(
+                    fontSize: 16, // Font size
+                    fontWeight: FontWeight.bold, // Font weight
+                    color: Colors.blue.shade900, // Text color
+                    ),
+                  ),
                 ),
               ],
             ),
