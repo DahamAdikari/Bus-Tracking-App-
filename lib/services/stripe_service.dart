@@ -8,14 +8,14 @@ class StripeService {
 
   static final StripeService instance = StripeService._();
 
-  Future<void> makePayment(int seatCount, String busId, List<int> selectedSeats,
+  Future<bool> makePayment(int seatCount, String busId, List<int> selectedSeats,
       String driverId) async {
     try {
       String? paymentIntentClientSecret = await _createPaymentIntent(
         100 * seatCount, // Adjust price per seat
         "usd",
       );
-      if (paymentIntentClientSecret == null) return;
+      if (paymentIntentClientSecret == null) return false;
 
       // Initialize the payment sheet
       await Stripe.instance.initPaymentSheet(
@@ -30,12 +30,15 @@ class StripeService {
       if (paymentSuccessful) {
         // Update seat status in Firestore
         await _updateSeatStatus(busId, selectedSeats, driverId);
+        return true;
       } else {
         print("Payment was not successful, seat status will not be updated.");
+        return false;
       }
     } catch (e) {
       print("Error in makePayment:");
       print(e);
+      return false;
     }
   }
 
