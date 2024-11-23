@@ -313,6 +313,7 @@ class RegistrationPage extends State<RegistrationPageClass> {
   String? busName;
   String? routeNum;
   String? numberPlate;
+  String? contactNumber;
   LatLng? sourceLocationLatLng;
   LatLng? destinationLocationLatLng;
   String? sourceLocation;
@@ -363,6 +364,14 @@ class RegistrationPage extends State<RegistrationPageClass> {
                     (value) {
                   numberPlate = value;
                 }),
+                SizedBox(height: 10),
+                _buildTextField(
+                  'Contact Number',
+                  'Please enter the contact number',
+                  (value) {
+                    contactNumber = value;
+                  },
+                ),
                 SizedBox(height: 10),
                 _buildTextField(
                     'Source Location', 'Please enter the source location',
@@ -458,6 +467,7 @@ class RegistrationPage extends State<RegistrationPageClass> {
                             destinationLocationLatLng:
                                 destinationLocationLatLng!,
                             numberPlate: numberPlate!,
+                            contactNumber: contactNumber!,
                             sourceLocation: sourceLocation!,
                             destinationLocation: destinationLocation!,
                             timetable_org: _timetable,
