@@ -313,7 +313,6 @@ class RegistrationPage extends State<RegistrationPageClass> {
   String? busName;
   String? routeNum;
   String? numberPlate;
-  String? contactNumber;
   LatLng? sourceLocationLatLng;
   LatLng? destinationLocationLatLng;
   String? sourceLocation;
@@ -349,30 +348,18 @@ class RegistrationPage extends State<RegistrationPageClass> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 _buildReadOnlyField('Bus ID', busID),
-                SizedBox(height: 10),
                 _buildTextField('Bus Name', 'Please enter the bus name',
                     (value) {
                   busName = value;
                 }),
-                SizedBox(height: 10),
                 _buildTextField('Route Number', 'Please enter the route number',
                     (value) {
                   routeNum = value;
                 }),
-                SizedBox(height: 10),
                 _buildTextField('Number Plate', 'Please enter the number plate',
                     (value) {
                   numberPlate = value;
                 }),
-                SizedBox(height: 10),
-                _buildTextField(
-                  'Contact Number',
-                  'Please enter the contact number',
-                  (value) {
-                    contactNumber = value;
-                  },
-                ),
-                SizedBox(height: 10),
                 _buildTextField(
                     'Source Location', 'Please enter the source location',
                     (value) {
@@ -402,12 +389,10 @@ class RegistrationPage extends State<RegistrationPageClass> {
                   Text(
                       'Source: ${sourceLocationLatLng!.latitude}, ${sourceLocationLatLng!.longitude}',
                       style: TextStyle(color: Colors.blueGrey)),
-                SizedBox(height: 10),
                 _buildTextField('Destination Location',
                     'Please enter the destination location', (value) {
                   destinationLocation = value;
                 }),
-                SizedBox(height: 10),
                 _buildLocationSelectionButton(
                   'Select Destination Location',
                   destinationLocationLatLng,
@@ -441,11 +426,7 @@ class RegistrationPage extends State<RegistrationPageClass> {
                   onPressed: _addTimetableRow,
                   style:
                       ElevatedButton.styleFrom(backgroundColor: Colors.green),
-                  child: Text('Add Timetable Row', 
-                    style: TextStyle(
-                      color: Colors.white,
-                  ),
-                  ),
+                  child: Text('Add Timetable Row'),
                 ),
                 SizedBox(height: 20),
                 ElevatedButton(
@@ -467,7 +448,6 @@ class RegistrationPage extends State<RegistrationPageClass> {
                             destinationLocationLatLng:
                                 destinationLocationLatLng!,
                             numberPlate: numberPlate!,
-                            contactNumber: contactNumber!,
                             sourceLocation: sourceLocation!,
                             destinationLocation: destinationLocation!,
                             timetable_org: _timetable,
@@ -552,7 +532,7 @@ class RegistrationPage extends State<RegistrationPageClass> {
           borderRadius: BorderRadius.circular(8.0),
         ),
       ),
-      child: Text(label, style: TextStyle(fontSize: 16, color: Colors.white,)),
+      child: Text(label, style: TextStyle(fontSize: 16)),
     );
   }
 

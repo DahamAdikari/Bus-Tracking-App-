@@ -38,7 +38,6 @@ class _returnTripState extends State<returnTrip> {
   LatLng? sourceLatLng; // Store source location LatLng
   LatLng? destinationLatLng; // Store destination location LatLng
   String? ticketPrice; // Store ticket price
-  String? contactNumber;
 
   @override
   void initState() {
@@ -63,7 +62,6 @@ class _returnTripState extends State<returnTrip> {
           routeNum = data['routeNum'];
           numberPlate = data['numberPlate']; // Fetch numberPlate
           ticketPrice = data['ticketPrice']; // Fetch ticketPrice
-          contactNumber = data['contactNumber'];
           // Swap source and destination locations
           sourceLocation = data['destinationLocation'];
           destinationLocation = data['sourceLocation'];
@@ -113,11 +111,7 @@ class _returnTripState extends State<returnTrip> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.blue,
-        title: Text('Add Return Bus Details',
-            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-        iconTheme: IconThemeData(color: Colors.white),
-        elevation: 0,
+        title: Text('Add Return Bus Details'),
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator()) // Show loading spinner
@@ -153,18 +147,7 @@ class _returnTripState extends State<returnTrip> {
                             });
                           }
                         },
-                        //child: Text('Edit Source Location'),
-                        child: Text(
-                          'Edit Source Location',
-                          style: TextStyle(
-                            fontSize: 16, // Font size
-                            fontWeight: FontWeight.bold, // Font weight
-                            color: Colors.blue.shade900, // Text color
-                          ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          fixedSize: Size(300, 40),
-                        ),
+                        child: Text('Edit Source Location'),
                       ),
                       if (sourceLatLng != null)
                         Text(
@@ -191,17 +174,7 @@ class _returnTripState extends State<returnTrip> {
                             });
                           }
                         },
-                        child: Text(
-                          'Edit Destination Location',
-                          style: TextStyle(
-                            fontSize: 16, // Font size
-                            fontWeight: FontWeight.bold, // Font weight
-                            color: Colors.blue.shade900, // Text color
-                          ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          fixedSize: Size(300, 40),
-                        ),
+                        child: Text('Edit Destination Location'),
                       ),
                       if (destinationLatLng != null)
                         Text(
@@ -210,8 +183,6 @@ class _returnTripState extends State<returnTrip> {
                           (value) => numberPlate = value),
                       _buildTextFormField('Ticket Price', ticketPrice,
                           (value) => ticketPrice = value),
-                      _buildTextFormField('Contact Number', contactNumber,
-                          (value) => contactNumber = value,),
 
                       SizedBox(height: 20),
 
@@ -264,17 +235,7 @@ class _returnTripState extends State<returnTrip> {
                             });
                           }
                         },
-                        child: Text(
-                          'Add Bus Halt',
-                          style: TextStyle(
-                            fontSize: 16, // Font size
-                            fontWeight: FontWeight.bold, // Font weight
-                            color: Colors.blue.shade900, // Text color
-                          ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          fixedSize: Size(300, 40),
-                        ),
+                        child: Text('Add Bus Halt'),
                       ),
 
                       // Add Current Location Button
@@ -293,17 +254,7 @@ class _returnTripState extends State<returnTrip> {
                             });
                           }
                         },
-                        child: Text(
-                          'Add Current Location of the Bus',
-                          style: TextStyle(
-                            fontSize: 16, // Font size
-                            fontWeight: FontWeight.bold, // Font weight
-                            color: Colors.blue.shade900, // Text color
-                          ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          fixedSize: Size(300, 40),
-                        ),
+                        child: Text('Add Current Location of the Bus'),
                       ),
                       if (_selectedLocation != null)
                         Text(
@@ -317,18 +268,7 @@ class _returnTripState extends State<returnTrip> {
                       // Add Bus Button
                       ElevatedButton(
                         onPressed: _submitForm,
-                        child: Text(
-                          'Add Bus',
-                          style: TextStyle(
-                          fontSize: 16, // Font size
-                          fontWeight: FontWeight.bold, // Font weight
-                          color: Colors.white, // Text color
-                          ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                        fixedSize: Size(300, 40),
-                        backgroundColor: Colors.blue,
-                        ),
+                        child: Text('Add Bus'),
                       ),
                     ],
                   ),
@@ -390,7 +330,6 @@ class _returnTripState extends State<returnTrip> {
         'routeNum': routeNum,
         'numberPlate': numberPlate, // Include numberPlate
         'ticketPrice': ticketPrice, // Include ticketPrice
-        'contactNumber' : contactNumber, 
         'sourceLocation': sourceLocation,
         'destinationLocation': destinationLocation,
         'latitude': _selectedLocation?.latitude,
