@@ -57,6 +57,8 @@ dependencies:
   dio: ^5.6.0
   uuid: ^4.5.1
   fluttertoast: ^8.2.8
+  http: ^1.2.2
+  google_maps_directions: ^0.0.4
 
 
 
@@ -112,6 +114,7 @@ flutter:
     - assets/images/seat_booking_images/
     - assets/images/passengerTiles/
     - assets/images/bar_code.jpg
+    - assets/images/bus.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

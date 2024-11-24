@@ -220,6 +220,19 @@ class _BusDetailsPagePassengerState extends State<BusDetailsPagePassenger> {
           var busData = snapshot.data!;
           double latitude = busData['latitude']?.toDouble() ?? 0.0;
           double longitude = busData['longitude']?.toDouble() ?? 0.0;
+          double sourceLatitude =
+              busData['sourceLatLng']['latitude']?.toDouble() ?? 0.0;
+          double sourceLongitude =
+              busData['sourceLatLng']['longitude']?.toDouble() ?? 0.0;
+          double destinationLatitude =
+              busData['destinationLatLng']['latitude']?.toDouble() ?? 0.0;
+          double destinationLongitude =
+              busData['destinationLatLng']['longitude']?.toDouble() ?? 0.0;
+
+          LatLng sourceLocation = LatLng(sourceLatitude, sourceLongitude);
+          LatLng destinationLocation =
+              LatLng(destinationLatitude, destinationLongitude);
+
           LatLng busPosition = LatLng(latitude, longitude);
 
           bool bookingAvailable = busData['bookingAvailable'] ?? false;
@@ -335,7 +348,10 @@ class _BusDetailsPagePassengerState extends State<BusDetailsPagePassenger> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => BusFullMapPage(
-                                busId: widget.busId, driverId: widget.driverId),
+                                busId: widget.busId,
+                                driverId: widget.driverId,
+                                source: sourceLocation,
+                                dest: destinationLocation),
                           ),
                         );
                       },

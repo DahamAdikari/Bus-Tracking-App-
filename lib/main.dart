@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:test_4/auth/on_boarding_screen/On_boarding_screen_new.dart';
 import 'package:test_4/auth/on_boarding_screen/on_boarding_screen.dart';
 import 'package:test_4/pages/Driver/buslist_driver.dart';
@@ -16,13 +17,12 @@ import 'package:test_4/consts.dart';
 import 'auth/log_in.dart';
 //import 'package:comproject/Useless/map_page.dart';
 
-
 void main() async {
   WidgetsFlutterBinding
       .ensureInitialized(); // Ensures that Flutter bindings are initialized
   await Firebase.initializeApp(); // Initializes Firebase
   await _setup();
-  
+
   runApp(const MyApp());
 }
 

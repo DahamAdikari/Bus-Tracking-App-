@@ -210,8 +210,11 @@ class _AdminPageState extends State<AdminPage> {
                       _buildTextFormField('Ticket Price', ticketPrice,
                           (value) => ticketPrice = value),
 
-                      _buildTextFormField('Contact Number', contactNumber,
-                          (value) => contactNumber = value,),
+                      _buildTextFormField(
+                        'Contact Number',
+                        contactNumber,
+                        (value) => contactNumber = value,
+                      ),
 
                       SizedBox(height: 20),
 
@@ -402,12 +405,12 @@ class _AdminPageState extends State<AdminPage> {
                         onPressed: _submitForm,
                         child: Text(
                           'Add Bus',
-                            style: TextStyle(
-                              fontSize: 16, // Font size
-                              fontWeight: FontWeight.bold, // Font weight
-                              color: Colors.white, // Text color
-                            ),
+                          style: TextStyle(
+                            fontSize: 16, // Font size
+                            fontWeight: FontWeight.bold, // Font weight
+                            color: Colors.white, // Text color
                           ),
+                        ),
                         style: ElevatedButton.styleFrom(
                           fixedSize: Size(300, 40),
                           backgroundColor: Colors.blue.shade900,
@@ -442,15 +445,15 @@ class _AdminPageState extends State<AdminPage> {
         //child: Text('Add the return bus'),
         child: Text(
           'Add the return bus',
-            style: TextStyle(
+          style: TextStyle(
             fontSize: 16, // Font size
             fontWeight: FontWeight.bold, // Font weight
             color: Colors.white, // Text color
-            ),
+          ),
         ),
         style: ElevatedButton.styleFrom(
-        fixedSize: Size(300, 40),
-        backgroundColor: Colors.blue,
+          fixedSize: Size(300, 40),
+          backgroundColor: Colors.blue,
         ),
       );
     }
@@ -510,7 +513,7 @@ class _AdminPageState extends State<AdminPage> {
         'destinationLocation': destinationLocation,
         'numberPlate': numberPlate, // Include numberPlate
         'ticketPrice': ticketPrice, // Include ticketPrice
-        'contactNumber': contactNumber, 
+        'contactNumber': contactNumber,
         'latitude': _selectedLocation?.latitude,
         'longitude': _selectedLocation?.longitude,
         'busHalts': _busHalts,
