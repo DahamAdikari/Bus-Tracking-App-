@@ -1,4 +1,4 @@
-# test_4
+# BusHub The Bus Tracking App
 
 Bus Hub - The bus tracking and seat booking system
 
